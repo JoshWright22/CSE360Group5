@@ -52,6 +52,19 @@ public class SetupAccountPage {
             String password = passwordField.getText();
             String code = inviteCodeField.getText();
             
+            String userNameError = "";
+            String passwordError = "";
+            //Evaluate username for proper formatting
+            userNameError = UserNameRecognizer.checkForValidUserName(userName);
+            //Evaluate password for proper formatting
+            passwordError = PasswordEvaluator.evaluatePassword(password);
+            //If an error message is returned, deny the password and display the error
+            if(!userNameError.isEmpty() || !passwordError.isEmpty())
+            {
+            	errorLabel.setText(userNameError + "\n" + passwordError);
+            	return;
+            }
+            
             try {
             	// Check if the user already exists
             	if(!databaseHelper.doesUserExist(userName)) {

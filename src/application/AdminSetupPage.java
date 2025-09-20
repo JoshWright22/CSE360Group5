@@ -3,6 +3,7 @@ package application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
@@ -33,10 +34,29 @@ public class AdminSetupPage {
 
         Button setupButton = new Button("Setup");
         
+        //Label to display error text
+        Label errorLabel = new Label();
+        errorLabel.setTextFill(Color.RED);
+        
+        
         setupButton.setOnAction(a -> {
         	// Retrieve user input
             String userName = userNameField.getText();
             String password = passwordField.getText();
+            
+            String userNameError = "";
+            String passwordError = "";
+            //Evaluate username for proper formatting
+            userNameError = UserNameRecognizer.checkForValidUserName(userName);
+            //Evaluate password for proper formatting
+            passwordError = PasswordEvaluator.evaluatePassword(password);
+            //If an error message is returned, deny the password and display the error
+            if(!userNameError.isEmpty() || !passwordError.isEmpty())
+            {
+            	errorLabel.setText(userNameError + "\n" + passwordError);
+            	return;
+            }
+            
             try {
             	// Create a new User object with admin role and register in the database
             	User user=new User(userName, password, "admin");
@@ -51,7 +71,7 @@ public class AdminSetupPage {
             }
         });
 
-        VBox layout = new VBox(10, userNameField, passwordField, setupButton);
+        VBox layout = new VBox(10, userNameField, passwordField, setupButton, errorLabel);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
 
         primaryStage.setScene(new Scene(layout, 800, 400));
