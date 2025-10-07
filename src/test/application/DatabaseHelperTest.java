@@ -2,7 +2,6 @@ package test.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLException;
@@ -41,38 +40,31 @@ public class DatabaseHelperTest {
 
 	@Test
 	void testRegisterUser() throws SQLException {
-		User user = new User("testUser", "Password123!", UserRole.STUDENT);
-		dbHelper.register(user);
-
-		assertTrue(dbHelper.doesUserExist("testUser"), "User should exist after registration");
-		assertEquals("user", dbHelper.getUserRole("testUser"), "User role should be 'user'");
+		User user = dbHelper.createUser("testUser", "Password123!", UserRole.STUDENT);
+		assertTrue(dbHelper.doesUserExist(user.getUserName()), "User should exist after registration");
+		assertEquals(UserRole.STUDENT, dbHelper.getUserRole(user.getUserName()), "User role should be 'student'");
 	}
 
 	@Test
 	void testLoginSuccess() throws SQLException {
-		User user = new User("loginUser", "Password123!", UserRole.STUDENT);
-		dbHelper.register(user);
-
+		User user = dbHelper.createUser("testUser", "Password123!", UserRole.STUDENT);
 		assertTrue(dbHelper.login(user), "Login should succeed with correct credentials");
 	}
 
 	@Test
 	void testLoginFail() throws SQLException {
-		User user = new User("nonExistent", "nopass", UserRole.STUDENT);
+		User user = new User("nonExistent", "nopass", null, null, null, UserRole.STUDENT);
 		assertFalse(dbHelper.login(user), "Login should fail for non-existent user");
 	}
 
 	@Test
 	void testDuplicateUserRegistration() throws SQLException {
-		User user = new User("copiedUser", "Password123!", UserRole.STUDENT);
-		dbHelper.register(user);
-
-		Exception exception = assertThrows(SQLException.class, () -> {
-			dbHelper.register(user);
-		});
-
-		String expectedMessage = "unique"; // H2 throws an exception mentioning UNIQUE constraint
-		String actualMessage = exception.getMessage().toLowerCase();
-		assertTrue(actualMessage.contains(expectedMessage));
+		User user = dbHelper.createUser("copiedUser", "Password123!", UserRole.STUDENT);
+		
+		assertFalse(user == null, "User was successfully registered");
+		
+		User dupeUser = dbHelper.createUser("copiedUser", "Password123!", UserRole.STUDENT);
+		
+		assertTrue(dupeUser == null, "Attempt to register a duplicate user was caught");
 	}
 }

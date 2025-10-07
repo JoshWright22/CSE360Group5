@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.UUID;
 
 import application.User;
+import application.UserRole;
 
 /**
  * The DatabaseHelper class is responsible for managing the connection to the
@@ -44,6 +45,7 @@ public class DatabaseHelper {
 	}
 
 	private void createTables() throws SQLException {
+		// Create the users table
 		String userTable = "CREATE TABLE IF NOT EXISTS cse360users ("
 				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
 				+ "userName VARCHAR(255) UNIQUE, "
@@ -70,19 +72,80 @@ public class DatabaseHelper {
 		}
 		return true;
 	}
-
-	// Registers a new user in the database.
-	public void register(User user) throws SQLException {
-		String insertUser = "INSERT INTO cse360users (userName, password, role) VALUES (?, ?, ?)";
-		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
-			pstmt.setString(1, user.getUserName());
-			pstmt.setString(2, user.getPassword());
-			pstmt.setString(3, user.getRole().toString());
-			pstmt.executeUpdate();
+	
+	// PHASE 1 
+	
+	/**
+	 * Create a user by populating all fields.
+	 * 
+	 * @param userName
+	 * @param password
+	 * @param firstName
+	 * @param lastName
+	 * @param email
+	 * @param role
+	 * @return	new User
+	 */
+	public User createUser(String userName, String password, String firstName, String lastName, String email, UserRole role) {
+		if (this.doesUserExist(userName)) {
+			System.err.println("Attempted to create a user with a duplicate username.");
+			return null;
 		}
+		
+		String query = "INSERT INTO cse360users (userName, password, firstName, lastName, email, role) "
+				+ "VALUES (?, ?, ?, ?, ?, ?)";
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+			stmt.setString(1, userName);
+			stmt.setString(2, password);
+			stmt.setString(3, firstName);
+			stmt.setString(4, lastName);
+			stmt.setString(5, email);
+			stmt.setString(6, role.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("Failed to register a user into the database.");
+			e.printStackTrace();
+		}
+		
+		return new User(userName, password, firstName, lastName, email, role);
+	}
+	
+	/**
+	 * Create a new user using only strictly-necessary details.
+	 * 
+	 * @param userName
+	 * @param password
+	 * @param role
+	 * @return	new User
+	 */
+	public User createUser(String userName, String password, UserRole role) {
+		return this.createUser(userName, password, "", "", "", role);
 	}
 
-	// Validates a user's login credentials.
+	public void registerUser(User user) {
+		String query = "INSERT INTO cse360users (userName, password, firstName, lastName, email, role) "
+				+ "VALUES (?, ?, ?, ?, ?, ?)";
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+			stmt.setString(1, user.getUserName());
+			stmt.setString(2, user.getPassword());
+			stmt.setString(3, user.getFirstName());
+			stmt.setString(4, user.getLastName());
+			stmt.setString(5, user.getEmail());
+			stmt.setString(6, user.getRole().toString());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("Failed to register a user into the database.");
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Validates a user's login.
+	 * 
+	 * @param user
+	 * @return	true if validation succeeds; false otherwise
+	 * @throws SQLException
+	 */
 	public boolean login(User user) throws SQLException {
 		String query = "SELECT * FROM cse360users WHERE userName = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -94,8 +157,38 @@ public class DatabaseHelper {
 			}
 		}
 	}
+	
+	/**
+	 * Attempts to fetch a user from the database given their userName.
+	 * 
+	 * @param userName
+	 * @return	User object with matching username if found; NULL otherwise
+	 */
+	public User fetchUser(String userName) {
+		String query = "SELECT * FROM cse360users WHERE userName = ?";
+		User user = null;
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+			stmt.setString(1, userName);
+			stmt.executeQuery();
+			ResultSet rs = stmt.getResultSet();
+			if (rs.next()) {
+				user = new User(rs.getString("userName"), rs.getString("password"),
+								rs.getString("firstName"), rs.getString("lastName"), rs.getString("email"),
+								UserRole.valueOf(rs.getString("role")));
+			} 
+		} catch (SQLException e) {
+			System.err.println("Failed to fetch a user from the database.");
+			e.printStackTrace();
+		}
+		return user;
+	}
 
-	// Checks if a user already exists in the database based on their userName.
+	/**
+	 * Checks if a user already exists in the database based on their UserName.
+	 * 
+	 * @param userName
+	 * @return	true if the user exists; false otherwise
+	 */
 	public boolean doesUserExist(String userName) {
 		String query = "SELECT COUNT(*) FROM cse360users WHERE userName = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -113,15 +206,20 @@ public class DatabaseHelper {
 		return false; // If an error occurs, assume user doesn't exist
 	}
 
-	// Retrieves the role of a user from the database using their UserName.
-	public String getUserRole(String userName) {
+	/**
+	 * Retrieves the role of a user from the database using their UserName.
+	 * 
+	 * @param userName
+	 * @return
+	 */
+	public UserRole getUserRole(String userName) {
 		String query = "SELECT role FROM cse360users WHERE userName = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, userName);
 			ResultSet rs = pstmt.executeQuery();
 
 			if (rs.next()) {
-				return rs.getString("role"); // Return the role if user exists
+				return UserRole.valueOf(rs.getString("role")); // Return the role if user exists
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -1,15 +1,14 @@
 package application;
 
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-
-import java.sql.SQLException;
-
 import application.evaluators.PasswordEvaluator;
 import application.evaluators.UserNameRecognizer;
-import databasePart1.*;
+import databasePart1.DatabaseHelper;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * The SetupAdmin class handles the setup process for creating an administrator
@@ -55,18 +54,12 @@ public class AdminSetupPage {
 				return;
 			}
 
-			try {
-				// Create a new User object with admin role and register in the database
-				User user = new User(userName, password, UserRole.ADMIN);
-				databaseHelper.register(user);
-				System.out.println("Administrator setup completed.");
+			// Create a new User object with ADMIN role and register in the database
+			User user = StartCSE360.getDatabaseHelper().createUser(userName, password, UserRole.ADMIN);
+			System.out.println("Administrator setup completed.");
 
-				// Navigate to the Welcome Login Page
-				new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
-			} catch (SQLException e) {
-				System.err.println("Database error: " + e.getMessage());
-				e.printStackTrace();
-			}
+			// Navigate to the Welcome Login Page
+			new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
 		});
 
 		VBox layout = new VBox(10, userNameField, passwordField, setupButton);

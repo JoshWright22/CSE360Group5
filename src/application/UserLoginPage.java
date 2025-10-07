@@ -60,14 +60,14 @@ public class UserLoginPage {
 			}
 
 			try {
-				User user = new User(userName, password);
+				User user = new User(userName, password, null);
 				WelcomeLoginPage welcomeLoginPage = new WelcomeLoginPage(databaseHelper);
 
 				// Retrieve the user's role from the database using userName
-				String role = databaseHelper.getUserRole(userName);
+				UserRole role = databaseHelper.getUserRole(userName);
 
 				if (role != null) {
-					user.setRole(UserRole.valueOf(role));
+					user.setRole(role);
 					if (databaseHelper.login(user)) {
 						welcomeLoginPage.show(primaryStage, user);
 					} else {
@@ -76,7 +76,7 @@ public class UserLoginPage {
 					}
 				} else {
 					// Display an error if the account does not exist
-					errorLabel.setText("user account doesn't exists");
+					errorLabel.setText("User account doesn't exist or is invalid (NULL UserRole)");
 				}
 
 			} catch (SQLException e) {

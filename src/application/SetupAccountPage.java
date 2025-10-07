@@ -1,15 +1,17 @@
 package application;
 
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-
-import java.sql.SQLException;
-
+import application.evaluators.EmailEvaluator;
+import application.evaluators.NameEvaluator;
 import application.evaluators.PasswordEvaluator;
 import application.evaluators.UserNameRecognizer;
-import databasePart1.*;
+import databasePart1.DatabaseHelper;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * SetupAccountPage class handles the account setup process for new users. Users
@@ -40,22 +42,22 @@ public class SetupAccountPage {
 		PasswordField passwordField = new PasswordField();
 		passwordField.setPromptText("Enter a password");
 		passwordField.setMaxWidth(250);
-		
+
 		// PHASE 0: Invite code field
 		TextField inviteCodeField = new TextField();
 		inviteCodeField.setPromptText("Enter a valid invitation code");
 		inviteCodeField.setMaxWidth(100);
-		
+
 		// PHASE 1: First name field
 		TextField firstNameField = new TextField();
 		firstNameField.setPromptText("Enter your first name");
 		firstNameField.setMaxWidth(250);
-		
+
 		// PHASE 1: Last name field
 		TextField lastNameField = new TextField();
 		lastNameField.setPromptText("Enter your last name");
 		lastNameField.setMaxWidth(250);
-		
+
 		// PHASE 1: Email field
 		TextField emailField = new TextField();
 		emailField.setPromptText("Enter your email address");
@@ -71,6 +73,9 @@ public class SetupAccountPage {
 			// Retrieve user input
 			String userName = userNameField.getText();
 			String password = passwordField.getText();
+			String firstName = firstNameField.getText();
+			String lastName = lastNameField.getText();
+			String email = emailField.getText();
 			String code = inviteCodeField.getText();
 
 			// Validate username
@@ -86,33 +91,44 @@ public class SetupAccountPage {
 				errorLabel.setText(passValidationResult);
 				return;
 			}
-			
-			// PHASE 1: Add 
 
-			try {
-				// Check if the user already exists
-				if (!databaseHelper.doesUserExist(userName)) {
-
-					// Validate the invitation code
-					if (databaseHelper.validateInvitationCode(code)) {
-
-						// Create a new user and register them in the database
-						User user = new User(userName, password, UserRole.STUDENT);
-						databaseHelper.register(user);
-
-						// Navigate to the Welcome Login Page
-						new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
-					} else {
-						errorLabel.setText("Please enter a valid invitation code");
-					}
-				} else {
-					errorLabel.setText("This username is taken! Please use another to setup an account");
-				}
-
-			} catch (SQLException e) {
-				System.err.println("Database error: " + e.getMessage());
-				e.printStackTrace();
+			// PHASE 1: Evaluate the first name
+			String firstNameResult = NameEvaluator.evaluateName(firstName);
+			if (!firstNameResult.isEmpty()) {
+				errorLabel.setText(firstNameResult);
+				return;
 			}
+
+			// PHASE 1: Evaluate the last name
+			String lastNameResult = NameEvaluator.evaluateName(lastName);
+			if (!lastNameResult.isEmpty()) {
+				errorLabel.setText(lastNameResult);
+				return;
+			}
+
+			// PHASE 1: Evaluate the email address
+			String emailResult = EmailEvaluator.evaluateEmail(email);
+			if (!emailResult.isEmpty()) {
+				errorLabel.setText(emailResult);
+				return;
+			}
+
+			// Check if the user already exists
+			if (!databaseHelper.doesUserExist(userName)) {
+
+				// Validate the invitation code
+				if (databaseHelper.validateInvitationCode(code)) {
+
+					// Create a new user and register them in the database
+					User user = StartCSE360.getDatabaseHelper().createUser(userName, password, firstName, lastName,
+							email, UserRole.STUDENT);
+
+					// Navigate user to welcome page
+					new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
+				} else
+					errorLabel.setText("Please enter a valid invitation code.");
+			} else
+				errorLabel.setText("Unfortunately, that username is taken.");
 		});
 
 		VBox layout = new VBox(10);
