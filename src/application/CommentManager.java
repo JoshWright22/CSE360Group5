@@ -10,6 +10,10 @@ import application.obj.Comment;
 import application.obj.Question;
 import databasePart1.DatabaseHelper;
 
+/**
+ * Acts as a manager class for dealing with Comment objects. This use of data hiding and encapsulation helps ensure parity
+ * between data stored in the local cache and data stored on the MySQL database.
+ */
 public class CommentManager {
 
 	private final DatabaseHelper database;
@@ -19,6 +23,9 @@ public class CommentManager {
 		this.database = database;
 	}
 	
+	/**
+	 * Fetches all data from the Comments table.
+	 */
 	public void fetchComments() {
 		String query = "SELECT * FROM Comments";
 		try (ResultSet rs = this.database.getStatement().executeQuery(query)) {
