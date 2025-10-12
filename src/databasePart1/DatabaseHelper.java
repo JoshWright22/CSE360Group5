@@ -61,6 +61,35 @@ public class DatabaseHelper {
 				+ "code VARCHAR(10) PRIMARY KEY, "
 				+ "isUsed BOOLEAN DEFAULT FALSE)";
 		statement.execute(invitationCodesTable);
+		
+		// Create the questions table
+		String questionsTable = "CREATE TABLE IF NOT EXISTS Questions ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255), "
+				+ "creationDate VARCHAR(255), "
+				+ "title VARCHAR(255), "
+				+ "content TEXT, "
+				+ "answers VARCHAR(255), "
+				+ "tags TEXT)";
+		statement.execute(questionsTable);
+		
+		// Create the answers table
+		String answersTable = "CREATE TABLE IF NOT EXISTS Answers ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255), "
+				+ "creationDate VARCHAR(255), "
+				+ "content TEXT)";
+		statement.execute(answersTable);
+		
+		// Create the comments table
+		String commentsTable = "CREATE TABLE IF NOT EXISTS Comments ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255), "
+				+ "creationDate VARCHAR(255), "
+				+ "content TEXT, "
+				+ "tags TEXT, "
+				+ "parentId INT)";
+		statement.execute(commentsTable);
 	}
 
 	// Check if the database is empty
@@ -71,6 +100,14 @@ public class DatabaseHelper {
 			return resultSet.getInt("count") == 0;
 		}
 		return true;
+	}
+	
+	public Statement getStatement() {
+		return this.statement;
+	}
+	
+	public Connection getConnection() {
+		return this.connection;
 	}
 	
 	// PHASE 1 
@@ -123,6 +160,7 @@ public class DatabaseHelper {
 	}
 
 	public void registerUser(User user) {
+		
 		String query = "INSERT INTO cse360users (userName, password, firstName, lastName, email, role) "
 				+ "VALUES (?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -219,7 +257,7 @@ public class DatabaseHelper {
 			ResultSet rs = pstmt.executeQuery();
 
 			if (rs.next()) {
-				return UserRole.valueOf(rs.getString("role")); // Return the role if user exists
+				return UserRole.valueOf(rs.getString("role").toUpperCase()); // Return the role if user exists
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

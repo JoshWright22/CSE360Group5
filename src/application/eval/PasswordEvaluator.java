@@ -1,4 +1,4 @@
-package application.evaluators;
+package application.eval;
 
 public class PasswordEvaluator {
 	/**

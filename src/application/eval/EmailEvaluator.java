@@ -1,4 +1,7 @@
-package application.evaluators;
+package application.eval;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Used to evaluate/validate the input of an email address.
@@ -28,9 +31,11 @@ public class EmailEvaluator {
 			result = ERR_TOO_LONG;
 
 		// Check for conformity to email address format
-		if (!input.matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\\\.[A-Z]{2,6}$"))
+		Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(input);
+		if (!matcher.matches())
 			result = ERR_INVALID;
-		
+
 		return result;
 	}
 }

@@ -1,7 +1,10 @@
-package application;
+package application.pages;
 
-import application.evaluators.PasswordEvaluator;
-import application.evaluators.UserNameRecognizer;
+import application.StartCSE360;
+import application.User;
+import application.UserRole;
+import application.eval.PasswordEvaluator;
+import application.eval.UserNameRecognizer;
 import databasePart1.DatabaseHelper;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;

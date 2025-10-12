@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import application.evaluators.UserNameRecognizer;
+import application.eval.UserNameRecognizer;
 
 public class UserNameRecognizerTest {
 	String firstCharacterError = "A UserName must start with A-Z or a-z.";

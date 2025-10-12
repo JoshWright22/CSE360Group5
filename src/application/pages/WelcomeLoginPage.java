@@ -1,10 +1,12 @@
-package application;
+package application.pages;
 
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.application.Platform;
+import application.User;
+import application.UserRole;
 import databasePart1.*;
 
 /**

@@ -1,4 +1,4 @@
-package application;
+package application.pages;
 
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -7,8 +7,10 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 
-import application.evaluators.PasswordEvaluator;
-import application.evaluators.UserNameRecognizer;
+import application.User;
+import application.UserRole;
+import application.eval.PasswordEvaluator;
+import application.eval.UserNameRecognizer;
 import databasePart1.*;
 
 /**
@@ -27,11 +29,11 @@ public class UserLoginPage {
 	public void show(Stage primaryStage) {
 		// Input field for the user's userName, password
 		TextField userNameField = new TextField();
-		userNameField.setPromptText("Enter userName");
+		userNameField.setPromptText("Enter your user name");
 		userNameField.setMaxWidth(250);
 
 		PasswordField passwordField = new PasswordField();
-		passwordField.setPromptText("Enter Password");
+		passwordField.setPromptText("Enter your password");
 		passwordField.setMaxWidth(250);
 
 		// Label to display error messages
@@ -42,10 +44,10 @@ public class UserLoginPage {
 
 		loginButton.setOnAction(a -> {
 			// Retrieve user inputs
-			String userName = userNameField.getText();
-			String password = passwordField.getText();
+			String userName = userNameField.getText().trim();
+			String password = passwordField.getText().trim();
 
-			// Validate username
+			// Validate user name
 			String userValidationResult = UserNameRecognizer.checkForValidUserName(userName);
 			if (!userValidationResult.isEmpty()) {
 				errorLabel.setText(userValidationResult);

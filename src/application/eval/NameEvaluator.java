@@ -1,4 +1,4 @@
-package application.evaluators;
+package application.eval;
 
 /**
  * Used to evaluate and validate the input of a person's first or last name.

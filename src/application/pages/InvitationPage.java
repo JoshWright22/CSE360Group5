@@ -1,4 +1,4 @@
-package application;
+package application.pages;
 
 import databasePart1.*;
 import javafx.scene.Scene;
