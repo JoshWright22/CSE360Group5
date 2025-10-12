@@ -3,6 +3,7 @@ package application;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,4 +49,12 @@ public class CommentManager {
 		}
 	}
 	
+	/**
+	 * Gets an unmodifiable reference to the set of comments stored in the local cache.
+	 * 
+	 * @return	Unmodifiable set containing local comments
+	 */
+	public Set<Comment> getCommentSet() {
+		return Collections.unmodifiableSet(this.commentSet);
+	}
 }
