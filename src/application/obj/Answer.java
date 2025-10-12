@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An object that represents user-submitted answers.
+ */
 public class Answer extends UserSubmission {
 
 	private String content;
@@ -16,26 +19,48 @@ public class Answer extends UserSubmission {
 		this.tags = tags;
 	}
 
+	/**
+	 * Gets the content of the answer.
+	 * 
+	 * @return String
+	 */
 	public String getContent() {
 		return this.content;
 	}
 
+	/**
+	 * Gets the tags of the answer, for organizational and search functionality.
+	 * 
+	 * @return
+	 */
 	public List<String> getTags() {
 		return Collections.unmodifiableList(this.tags);
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
+	/**
+	 * Sets the content of the answer.
+	 * 
+	 * @param content New content to set
+	 */
 	public void setContent(String content) {
 		this.content = content;
 	}
 
+	/**
+	 * Sets the tags of the answer.
+	 * 
+	 * @param tags New set of tags
+	 */
 	public void setTags(List<String> tags) {
 		this.tags = tags;
 	}
 
+	/**
+	 * Adds new tags to the answer.
+	 * 
+	 * @param tags Tags to add
+	 * @return true if tags were added; false otherwise
+	 */
 	public boolean addTags(String... tags) {
 		boolean result = false;
 		for (String t : tags) {
@@ -48,6 +73,12 @@ public class Answer extends UserSubmission {
 		return result;
 	}
 
+	/**
+	 * Removes specific tags from the answer.
+	 * 
+	 * @param tags Tags to remove
+	 * @return true if tags were found and removed; false otherwise
+	 */
 	public boolean removeTags(String... tags) {
 		boolean result = false;
 		for (String t : tags) {
@@ -56,6 +87,9 @@ public class Answer extends UserSubmission {
 		return result;
 	}
 
+	/**
+	 * Clears all tags from the answer.
+	 */
 	public void removeAllTags() {
 		this.tags = new ArrayList<String>();
 	}
