@@ -1,6 +1,5 @@
-package application;
+package application.pages;
 
-import application.pages.AdminSetupPage;
 import databasePart1.*;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
