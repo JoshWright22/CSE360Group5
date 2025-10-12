@@ -39,15 +39,15 @@ public class StartCSE360 extends Application {
 	public static DatabaseHelper getDatabaseHelper() {
 		return databaseHelper;
 	}
-	
+
 	public static QuestionManager getQuestionManager() {
 		return questionManager;
 	}
-	
+
 	public static AnswerManager getAnswerManager() {
 		return answerManager;
 	}
-	
+
 	public static CommentManager getCommentManager() {
 		return commentManager;
 	}
