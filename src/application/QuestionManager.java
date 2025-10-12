@@ -16,21 +16,25 @@ import application.obj.Answer;
 import application.obj.Question;
 import databasePart1.DatabaseHelper;
 
+/**
+ * Acts as a manager class for dealing with Answer objects. This use of data
+ * hiding and encapsulation helps ensure parity between data stored in the local
+ * cache and data stored on the MySQL database.
+ */
 public class QuestionManager {
-	
+
 	// For database access
 	private final DatabaseHelper database;
-	
+
 	private final Set<Question> questionSet = new HashSet<>();
-	
+
 	public QuestionManager(DatabaseHelper database) {
 		this.database = database;
 	}
-	
-	public Set<Question> getQuestionSet() {
-		return Collections.unmodifiableSet(this.questionSet);
-	}
-	
+
+	/**
+	 * Fetches all data from the Questions table.
+	 */
 	public void fetchQuestions() {
 		String query = "SELECT * FROM Questions";
 		try (ResultSet rs = this.database.getStatement().executeQuery(query)) {
@@ -48,9 +52,9 @@ public class QuestionManager {
 					Answer a = StartCSE360.getAnswerManager().fetchAnswer(Integer.parseInt(s));
 					answers.add(a);
 				}
-				
+
 				List<String> tags = Arrays.asList(rs.getString("tags").split(","));
-				
+
 				// Construct question and add it into local cache
 				Question q = new Question(id, userName, creationDate, title, content, answers, tags);
 				this.questionSet.add(q);
@@ -60,10 +64,16 @@ public class QuestionManager {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 * Fetches a particular question from the Questions table.
+	 * 
+	 * @param id id of question to fetch
+	 * @return Question object
+	 */
 	public Question fetchQuestion(int id) {
 		Question result = null;
-		
+
 		String query = "SELECT * FROM Questions WHERE id = ?";
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
 			stmt.setInt(0, id);
@@ -82,18 +92,44 @@ public class QuestionManager {
 					answers.add(a);
 				}
 				List<String> tags = Arrays.asList(rs.getString("tags").split(","));
-				
+
+				// Construct the Question object from the retrieved & processed data
 				result = new Question(i, userName, creationTime, title, content, answers, tags);
+				// Add the fetched question to the local cache if necessary
+				if (!this.questionSet.contains(result))
+					this.questionSet.add(result);
 			}
 		} catch (SQLException e) {
 			System.err.println("Failed to fetch answer from database.");
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
-	
-	public Question createNewQuestion(String userName, LocalDateTime creationTime, String title, String content, List<String> tags) {
+
+	/**
+	 * Gets an unmodifiable reference to the set of questions stored in the local
+	 * cache.
+	 * 
+	 * @return Unmodifiable set containing local questions
+	 */
+	public Set<Question> getQuestionSet() {
+		return Collections.unmodifiableSet(this.questionSet);
+	}
+
+	/**
+	 * Creates a new question before inserting it into the Questions table and local
+	 * cache.
+	 * 
+	 * @param userName     Name of user who asked the question
+	 * @param creationTime When the question was created
+	 * @param title        User-submitted question title
+	 * @param content      User-submitted question body/content
+	 * @param tags         Tags for categorization and search purposes
+	 * @return new Question object
+	 */
+	public Question createNewQuestion(String userName, LocalDateTime creationTime, String title, String content,
+			List<String> tags) {
 		String query = "INSERT INTO Questions (userName, creationTime, title, content, answers, tags) VALUES (?, ?, ?, ?, ?, ?)";
 		int id = -1;
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -111,12 +147,17 @@ public class QuestionManager {
 			System.err.println("Failed to create a new question.");
 			e.printStackTrace();
 		}
-		
+
 		Question q = new Question(id, userName, creationTime, title, content, null, tags);
 		this.questionSet.add(q);
 		return q;
 	}
-	
+
+	/**
+	 * Deletes a particular question from the database and the local cache.
+	 * 
+	 * @param q Question to delete
+	 */
 	public void deleteQuestion(Question q) {
 		String query = "DELETE FROM Questions WHERE id = ?";
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
