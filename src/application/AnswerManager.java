@@ -13,6 +13,10 @@ import java.util.Set;
 import application.obj.Answer;
 import databasePart1.DatabaseHelper;
 
+/**
+ * Acts as a manager class for dealing with Answer objects. This use of data hiding and encapsulation helps ensure parity
+ * between data stored in the local cache and data stored on the MySQL database.
+ */
 public class AnswerManager {
 
 	private final DatabaseHelper database;
@@ -22,6 +26,9 @@ public class AnswerManager {
 		this.database = database;
 	}
 	
+	/**
+	 * Attempts to fetch all data from the Answers table.
+	 */
 	public void fetchAnswers() {
 		String query = "SELECT * FROM Answers";
 		try (ResultSet rs = this.database.getStatement().executeQuery(query)) {
@@ -43,6 +50,12 @@ public class AnswerManager {
 		}
 	}
 	
+	/**
+	 * Fetches a particular answer from the database given the answer's ID.
+	 * 
+	 * @param id	ID of answer whose data will be fetched
+	 * @return		Answer object constructed from database data
+	 */
 	public Answer fetchAnswer(int id) {
 		Answer result = null;
 		
@@ -67,6 +80,11 @@ public class AnswerManager {
 		return result;
 	}
 	
+	/**
+	 * Gets an unmodifiable reference to the set of answers stored in the local cache.
+	 * 
+	 * @return	Unmodifiable set containing local answers
+	 */
 	public Set<Answer> getAnswerSet() {
 		return Collections.unmodifiableSet(this.answerSet);
 	}
