@@ -1,12 +1,12 @@
 package application;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
 import java.sql.SQLException;
 
 import application.pages.FirstPage;
 import application.pages.SetupLoginSelectionPage;
 import databasePart1.DatabaseHelper;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
 public class StartCSE360 extends Application {
 
@@ -22,10 +22,10 @@ public class StartCSE360 extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			databaseHelper.connectToDatabase(); // Connect to the database
-			questionManager.fetchQuestions(); // Populate questions from database
-			answerManager.fetchAnswers(); // Populate answers from database
-			commentManager.fetchComments(); // Populate comments from database
+			databaseHelper.connectToDatabase(); 	// Connect to the database
+			questionManager.fetchQuestions(); 		// Populate questions from database
+			answerManager.fetchAnswers(); 			// Populate answers from database
+			commentManager.fetchComments(); 		// Populate comments from database
 			if (databaseHelper.isDatabaseEmpty()) {
 				new FirstPage(databaseHelper).show(primaryStage);
 			} else {
