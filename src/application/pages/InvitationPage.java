@@ -1,5 +1,6 @@
 package application.pages;
 
+import application.User;
 import databasePart1.*;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -21,7 +22,7 @@ public class InvitationPage {
 	 *                       operations.
 	 * @param primaryStage   The primary stage where the scene will be displayed.
 	 */
-	public void show(DatabaseHelper databaseHelper, Stage primaryStage) {
+	public void show(DatabaseHelper databaseHelper, Stage primaryStage, User user) {
 		VBox layout = new VBox();
 		layout.setStyle("-fx-alignment: center; -fx-padding: 20;");
 
@@ -31,10 +32,13 @@ public class InvitationPage {
 
 		// Button to generate the invitation code
 		Button showCodeButton = new Button("Generate Invitation Code");
+		
+		// Button to return to home page
+		Button backButton = new Button("Go back");
 
 		// Label to display the generated invitation code
-		Label inviteCodeLabel = new Label("");
-		;
+		Label inviteCodeLabel = new Label("One-time invitation code:");
+		
 		inviteCodeLabel.setStyle("-fx-font-size: 14px; -fx-font-style: italic;");
 
 		showCodeButton.setOnAction(a -> {
@@ -42,8 +46,12 @@ public class InvitationPage {
 			String invitationCode = databaseHelper.generateInvitationCode();
 			inviteCodeLabel.setText(invitationCode);
 		});
+		
+		backButton.setOnAction(a -> {
+			new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
+		});
 
-		layout.getChildren().addAll(userLabel, showCodeButton, inviteCodeLabel);
+		layout.getChildren().addAll(userLabel, showCodeButton, inviteCodeLabel, backButton);
 		Scene inviteScene = new Scene(layout, 800, 400);
 
 		// Set the scene to primary stage
