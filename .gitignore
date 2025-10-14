@@ -17,4 +17,4 @@ target/
 
 # Log files and other temporary data
 *.log
-tmp/
+.DS_Store
