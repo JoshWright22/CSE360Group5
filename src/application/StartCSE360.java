@@ -14,6 +14,7 @@ public class StartCSE360 extends Application {
 	private static final QuestionManager questionManager = new QuestionManager(databaseHelper);
 	private static final AnswerManager answerManager = new AnswerManager(databaseHelper);
 	private static final CommentManager commentManager = new CommentManager(databaseHelper);
+	private static User currentUser = null;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -50,5 +51,13 @@ public class StartCSE360 extends Application {
 
 	public static CommentManager getCommentManager() {
 		return commentManager;
+	}
+	public static void setCurrentUser(User user)
+	{
+		currentUser = user;
+	}
+	public static User getCurrentUser()
+	{
+		return currentUser;
 	}
 }

@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 
+import application.StartCSE360;
 import application.User;
 import application.UserRole;
 import application.eval.PasswordEvaluator;
@@ -71,6 +72,7 @@ public class UserLoginPage {
 				if (role != null) {
 					user.setRole(role);
 					if (databaseHelper.login(user)) {
+						StartCSE360.setCurrentUser(user);
 						welcomeLoginPage.show(primaryStage, user);
 					} else {
 						// Display an error if the login fails

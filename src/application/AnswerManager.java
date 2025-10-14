@@ -3,6 +3,7 @@ package application;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import application.obj.Answer;
+import application.obj.Question;
 import databasePart1.DatabaseHelper;
 
 /**
@@ -38,10 +40,10 @@ public class AnswerManager {
 				String userName = rs.getString("userName");
 				LocalDateTime creationDate = LocalDateTime.parse(rs.getString("creationDate"));
 				String content = rs.getString("content");
-				List<String> tags = Arrays.asList(rs.getString("tags").split(","));
+				//List<String> tags = Arrays.asList(rs.getString("tags").split(","));
 				
 				// Construct answer and add it into local cache
-				Answer a = new Answer(id, userName, creationDate, content, tags);
+				Answer a = new Answer(id, userName, creationDate, content, null);
 				this.answerSet.add(a);
 			}
 		} catch (SQLException e) {
@@ -68,9 +70,9 @@ public class AnswerManager {
 				String userName = rs.getString("userName");
 				LocalDateTime creationTime = LocalDateTime.parse(rs.getString("creationDate"));
 				String content = rs.getString("content");
-				List<String> tags = Arrays.asList(rs.getString("tags").split(","));
+				//List<String> tags = Arrays.asList(rs.getString("tags").split(","));
 				
-				result = new Answer(i, userName, creationTime, content, tags);
+				result = new Answer(i, userName, creationTime, content, null);
 			}
 		} catch (SQLException e) {
 			System.err.println("Failed to fetch answer from database.");
@@ -88,4 +90,35 @@ public class AnswerManager {
 	public Set<Answer> getAnswerSet() {
 		return Collections.unmodifiableSet(this.answerSet);
 	}
+	
+	/**
+	 * Creates a new Answer before inserting it into the Answers table and local
+	 * cache.
+	 * 
+	 * @param userName     Name of user who posted the answer
+	 * @param creationTime When the answer was created
+	 * @param content      User-submitted answer body/content
+	 * @return new Answer object
+	 */
+	public Answer createNewAnswer(String userName, LocalDateTime creationDate, String content) {
+		String query = "INSERT INTO Answers (userName, creationDate, content) VALUES (?, ?, ?)";
+		int id = -1;
+		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+			stmt.setString(1, userName);
+			stmt.setString(2, creationDate.toString());
+			stmt.setString(3, content);
+			stmt.executeUpdate();
+			ResultSet results = stmt.getGeneratedKeys();
+			if (results.next())
+				id = results.getInt(1);
+		} catch (SQLException e) {
+			System.err.println("Failed to create a new answer.");
+			e.printStackTrace();
+		}
+
+		Answer a = new Answer(id, userName, creationDate, content, null);
+		this.answerSet.add(a);
+		return a;
+	}
+
 }

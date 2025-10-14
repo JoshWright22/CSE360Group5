@@ -49,8 +49,11 @@ public class QuestionManager {
 				String answerIds = rs.getString("answers");
 				List<Answer> answers = new ArrayList<>();
 				for (String s : answerIds.split(",")) {
-					Answer a = StartCSE360.getAnswerManager().fetchAnswer(Integer.parseInt(s));
-					answers.add(a);
+					if(!s.isEmpty())
+					{
+						Answer a = StartCSE360.getAnswerManager().fetchAnswer(Integer.parseInt(s));
+						answers.add(a);
+					}
 				}
 
 				List<String> tags = Arrays.asList(rs.getString("tags").split(","));
@@ -88,8 +91,11 @@ public class QuestionManager {
 				String answerIds = rs.getString("answers");
 				List<Answer> answers = new ArrayList<>();
 				for (String s : answerIds.split(",")) {
-					Answer a = StartCSE360.getAnswerManager().fetchAnswer(Integer.parseInt(s));
-					answers.add(a);
+					if(!s.isEmpty())
+					{
+						Answer a = StartCSE360.getAnswerManager().fetchAnswer(Integer.parseInt(s));
+						answers.add(a);
+					}
 				}
 				List<String> tags = Arrays.asList(rs.getString("tags").split(","));
 
@@ -128,17 +134,17 @@ public class QuestionManager {
 	 * @param tags         Tags for categorization and search purposes
 	 * @return new Question object
 	 */
-	public Question createNewQuestion(String userName, LocalDateTime creationTime, String title, String content,
+	public Question createNewQuestion(String userName, LocalDateTime creationDate, String title, String content,
 			List<String> tags) {
-		String query = "INSERT INTO Questions (userName, creationTime, title, content, answers, tags) VALUES (?, ?, ?, ?, ?, ?)";
+		String query = "INSERT INTO Questions (userName, creationDate, title, content, answers, tags) VALUES (?, ?, ?, ?, ?, ?)";
 		int id = -1;
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-			stmt.setString(0, userName);
-			stmt.setString(1, creationTime.toString());
-			stmt.setString(2, title);
-			stmt.setString(3, content);
-			stmt.setString(4, "");
-			stmt.setString(5, String.join(",", tags));
+			stmt.setString(1, userName);
+			stmt.setString(2, creationDate.toString());
+			stmt.setString(3, title);
+			stmt.setString(4, content);
+			stmt.setString(5, "");
+			stmt.setString(6, String.join(",", tags));
 			stmt.executeUpdate();
 			ResultSet results = stmt.getGeneratedKeys();
 			if (results.next())
@@ -148,7 +154,7 @@ public class QuestionManager {
 			e.printStackTrace();
 		}
 
-		Question q = new Question(id, userName, creationTime, title, content, null, tags);
+		Question q = new Question(id, userName, creationDate, title, content, null, tags);
 		this.questionSet.add(q);
 		return q;
 	}
