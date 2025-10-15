@@ -40,14 +40,14 @@ public class DatabaseHelperTest {
 
 	@Test
 	void testRegisterUser() throws SQLException {
-		User user = dbHelper.createUser("testUser", "Password123!", UserRole.STUDENT);
+		User user = dbHelper.createUser("testUser1", "Password123!", UserRole.STUDENT);
 		assertTrue(dbHelper.doesUserExist(user.getUserName()), "User should exist after registration");
 		assertEquals(UserRole.STUDENT, dbHelper.getUserRole(user.getUserName()), "User role should be 'student'");
 	}
 
 	@Test
 	void testLoginSuccess() throws SQLException {
-		User user = dbHelper.createUser("testUser", "Password123!", UserRole.STUDENT);
+		User user = dbHelper.createUser("testUser2", "Password123!", UserRole.STUDENT);
 		assertTrue(dbHelper.login(user), "Login should succeed with correct credentials");
 	}
 
