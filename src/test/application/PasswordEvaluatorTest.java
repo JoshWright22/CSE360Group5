@@ -12,7 +12,7 @@ public class PasswordEvaluatorTest {
 	String lowerCaseError = "Lower case; ";
 	String specialCharacterError = "Special character; ";
 	String numericError = "Numeric digits; ";
-	String lengthError = "Long enough; ";
+	String lengthError = "Long Enough; ";
 	String generalError = "conditions were not satisfied";
 
 	@Test
