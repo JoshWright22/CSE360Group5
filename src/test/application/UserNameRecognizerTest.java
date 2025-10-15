@@ -12,7 +12,7 @@ public class UserNameRecognizerTest {
 	String minCharacterError = "A UserName must have at least 4 characters.";
 	String maxCharacterError = "A UserName must have no more than 16 character.";
 	String invalidCharacterError = "A UserName character may only contain the characters A-Z, a-z, 0-9.";
-	String specialCharacterError = "A UserName character after a hyphen, underscore, or period must be A-Z, a-z, 0-9.";
+	String specialCharacterError = "A UserName character after a period, underscore, or dash must be A-Z, a-z, or 0-9.";
 
 	@Test
 	void testEmptyUserName() {
@@ -50,7 +50,7 @@ public class UserNameRecognizerTest {
 		error = UserNameRecognizer.checkForValidUserName(userName);
 		assertFalse(error.contains(specialCharacterError), specialCharacterError);
 
-		userName = "Be+-th";
+		userName = "Be--th";
 		error = UserNameRecognizer.checkForValidUserName(userName);
 		assertTrue(error.contains(specialCharacterError), specialCharacterError);
 
@@ -95,7 +95,7 @@ public class UserNameRecognizerTest {
 		error = UserNameRecognizer.checkForValidUserName(userName);
 		assertTrue(error.contains(invalidCharacterError), invalidCharacterError);
 
-		userName = "A13x15";
+		userName = "A13x!5";
 		error = UserNameRecognizer.checkForValidUserName(userName);
 		assertTrue(error.contains(invalidCharacterError), invalidCharacterError);
 
