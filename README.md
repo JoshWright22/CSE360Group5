@@ -50,7 +50,7 @@ git clone https://github.com/JoshWright22/CSE360Group5.git
 * Source code: `src/application/`
 * JUnit Tests: `tests/application/`
 * Recordings: Screencasts demonstrating functional requirements and team collaboration
-* PDF Submission: `TP1-Submission-Template.docx`
+* PDF Submission: `TP2-Submission-Template.docx`
 
 ## Project Tasks
 
