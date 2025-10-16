@@ -27,6 +27,7 @@ public class DatabaseHelper {
 
 	private Connection connection = null;
 	private Statement statement = null;
+	// PreparedStatement pstmt
 
 	public void connectToDatabase() throws SQLException {
 		try {

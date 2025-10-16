@@ -2,7 +2,6 @@
 .classpath
 .project
 .settings/
-module-path.java
 
 # Generated files
 bin/

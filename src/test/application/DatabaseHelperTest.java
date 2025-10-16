@@ -32,6 +32,13 @@ public class DatabaseHelperTest {
 	}
 
 	@Test
+	void testDatabaseStartsEmpty() throws SQLException {
+		// Assuming database is cleared before testing
+		boolean isEmpty = dbHelper.isDatabaseEmpty();
+		assertTrue(isEmpty, "Database should start empty");
+	}
+
+	@Test
 	void testRegisterUser() throws SQLException {
 		User user = dbHelper.createUser("testUser1", "Password123!", UserRole.STUDENT);
 		assertTrue(dbHelper.doesUserExist(user.getUserName()), "User should exist after registration");
