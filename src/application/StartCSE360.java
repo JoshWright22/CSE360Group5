@@ -23,10 +23,10 @@ public class StartCSE360 extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			databaseHelper.connectToDatabase(); 	// Connect to the database
-			answerManager.fetchAnswers(); 			// Populate answers from database
-			questionManager.fetchQuestions(); 		// Populate questions from database
-			commentManager.fetchComments(); 		// Populate comments from database
+			databaseHelper.connectToDatabase(); // Connect to the database
+			answerManager.fetchAnswers(); // Populate answers from database
+			questionManager.fetchQuestions(); // Populate questions from database
+			commentManager.fetchComments(); // Populate comments from database
 			if (databaseHelper.isDatabaseEmpty()) {
 				new FirstPage(databaseHelper).show(primaryStage);
 			} else {
@@ -52,12 +52,12 @@ public class StartCSE360 extends Application {
 	public static CommentManager getCommentManager() {
 		return commentManager;
 	}
-	public static void setCurrentUser(User user)
-	{
+
+	public static void setCurrentUser(User user) {
 		currentUser = user;
 	}
-	public static User getCurrentUser()
-	{
+
+	public static User getCurrentUser() {
 		return currentUser;
 	}
 }

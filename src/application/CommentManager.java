@@ -12,18 +12,19 @@ import application.obj.Question;
 import databasePart1.DatabaseHelper;
 
 /**
- * Acts as a manager class for dealing with Comment objects. This use of data hiding and encapsulation helps ensure parity
- * between data stored in the local cache and data stored on the MySQL database.
+ * Acts as a manager class for dealing with Comment objects. This use of data
+ * hiding and encapsulation helps ensure parity between data stored in the local
+ * cache and data stored on the MySQL database.
  */
 public class CommentManager {
 
 	private final DatabaseHelper database;
 	private Set<Comment> commentSet = new HashSet<>();
-	
+
 	public CommentManager(DatabaseHelper database) {
 		this.database = database;
 	}
-	
+
 	/**
 	 * Fetches all data from the Comments table.
 	 */
@@ -38,7 +39,7 @@ public class CommentManager {
 				String content = rs.getString("content");
 				// Sadly, fetching questions is a bit more complicated
 				Question q = StartCSE360.getQuestionManager().fetchQuestion(rs.getInt("parent"));
-				
+
 				// Construct comment and add it into local cache
 				Comment c = new Comment(id, userName, creationDate, content, q);
 				this.commentSet.add(c);
@@ -48,11 +49,12 @@ public class CommentManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * Gets an unmodifiable reference to the set of comments stored in the local cache.
+	 * Gets an unmodifiable reference to the set of comments stored in the local
+	 * cache.
 	 * 
-	 * @return	Unmodifiable set containing local comments
+	 * @return Unmodifiable set containing local comments
 	 */
 	public Set<Comment> getCommentSet() {
 		return Collections.unmodifiableSet(this.commentSet);

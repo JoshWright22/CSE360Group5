@@ -38,9 +38,9 @@ public class QuestionManager {
 	public void fetchQuestions() {
 		String query = "SELECT * FROM Questions";
 		try (ResultSet rs = this.database.getStatement().executeQuery(query)) {
-			
+
 			questionSet.clear();
-			
+
 			while (rs.next()) {
 				// Collect required information to construct Question object
 				int id = rs.getInt("id");
@@ -52,13 +52,12 @@ public class QuestionManager {
 				String answerIds = rs.getString("answers");
 				List<Answer> answers = new ArrayList<>();
 				for (String s : answerIds.split(",")) {
-					if(!s.isEmpty())
-					{
+					if (!s.isEmpty()) {
 						int answerID = Integer.parseInt(s);
 						Answer a = StartCSE360.getAnswerManager().fetchAnswer(answerID);
 						answers.add(a);
 					}
-					
+
 				}
 
 				List<String> tags = Arrays.asList(rs.getString("tags").split(","));
@@ -66,7 +65,7 @@ public class QuestionManager {
 				// Construct question and add it into local cache
 				Question q = new Question(id, userName, creationDate, title, content, answers, tags);
 				this.questionSet.add(q);
-				//Add answers to question
+				// Add answers to question
 				for (Answer a : answers)
 					q.addAnswers(a);
 			}
@@ -99,8 +98,7 @@ public class QuestionManager {
 				String answerIds = rs.getString("answers");
 				List<Answer> answers = new ArrayList<>();
 				for (String s : answerIds.split(",")) {
-					if(!s.isEmpty())
-					{
+					if (!s.isEmpty()) {
 						Answer a = StartCSE360.getAnswerManager().fetchAnswer(Integer.parseInt(s));
 						answers.add(a);
 					}
@@ -144,19 +142,19 @@ public class QuestionManager {
 	 */
 	public Question createNewQuestion(String userName, LocalDateTime creationDate, String title, String content,
 			List<String> tags) {
-		
+
 		if (tags == null)
-	        tags = new ArrayList<>();
-		
+			tags = new ArrayList<>();
+
 		// Split title into searchable tags
-	    for (String s : title.trim().split("\\s+")) {
-	        s = s.replaceAll("[^a-zA-Z0-9]", ""); 
-	        s = s.toLowerCase();                 
-	        if (!s.isEmpty() && !tags.contains(s)) {
-	            tags.add(s);
-	        }
-	    }
-		
+		for (String s : title.trim().split("\\s+")) {
+			s = s.replaceAll("[^a-zA-Z0-9]", "");
+			s = s.toLowerCase();
+			if (!s.isEmpty() && !tags.contains(s)) {
+				tags.add(s);
+			}
+		}
+
 		String query = "INSERT INTO Questions (userName, creationDate, title, content, answers, tags) VALUES (?, ?, ?, ?, ?, ?)";
 		int id = -1;
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -196,7 +194,7 @@ public class QuestionManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Adds an answer to a question and updates the database
 	 * 
@@ -204,56 +202,56 @@ public class QuestionManager {
 	 * @param a answer to insert
 	 */
 	public void addAnswerToQuestion(Question q, Answer a) {
-	    // Update the question
-	    q.addAnswers(a);
+		// Update the question
+		q.addAnswers(a);
 
-	    // Fetch the current CSV string from the database
-	    String query = "SELECT answers FROM Questions WHERE id = ?";
-	    try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
-	        stmt.setInt(1, q.getId());
-	        ResultSet rs = stmt.executeQuery();
-	        String answerIds = "";
-	        if (rs.next()) {
-	            answerIds = rs.getString("answers");
-	        }
+		// Fetch the current CSV string from the database
+		String query = "SELECT answers FROM Questions WHERE id = ?";
+		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
+			stmt.setInt(1, q.getId());
+			ResultSet rs = stmt.executeQuery();
+			String answerIds = "";
+			if (rs.next()) {
+				answerIds = rs.getString("answers");
+			}
 
-	        // Append the new answer ID
-	        String updatedCsv = (answerIds == null || answerIds.isEmpty())
-	                            ? String.valueOf(a.getId())
-	                            : answerIds + "," + a.getId();
+			// Append the new answer ID
+			String updatedCsv = (answerIds == null || answerIds.isEmpty()) ? String.valueOf(a.getId())
+					: answerIds + "," + a.getId();
 
-	        //Update the database
-	        String updateQuery = "UPDATE Questions SET answers = ? WHERE id = ?";
-	        try (PreparedStatement updateStmt = this.database.getConnection().prepareStatement(updateQuery)) {
-	            updateStmt.setString(1, updatedCsv);
-	            updateStmt.setInt(2, q.getId());
-	            updateStmt.executeUpdate();
-	        }
+			// Update the database
+			String updateQuery = "UPDATE Questions SET answers = ? WHERE id = ?";
+			try (PreparedStatement updateStmt = this.database.getConnection().prepareStatement(updateQuery)) {
+				updateStmt.setString(1, updatedCsv);
+				updateStmt.setInt(2, q.getId());
+				updateStmt.executeUpdate();
+			}
 
-	    } catch (SQLException e) {
-	        System.err.println("Failed to update question answers in the database.");
-	        e.printStackTrace();
-	    }
+		} catch (SQLException e) {
+			System.err.println("Failed to update question answers in the database.");
+			e.printStackTrace();
+		}
 	}
-	
-    /**
-     * Searches all locally cached questions by tag. This also checks tags of answers belonging to the question.
-     *
-     * @param queryTag The tag string to search for
-     * @return A set of Question objects that contain the tag
-     */
-	public Set<Question> searchByTag(String queryTag) {
-	    Set<Question> results = new HashSet<>();
-	    String tagLower = queryTag.toLowerCase();
 
-	    for (Question q : questionSet) {
-	        for (String tag : q.getTags()) {
-	            if (tag.toLowerCase().contains(tagLower)) {
-	                results.add(q);
-	                break;
-	            }
-	        }
-	    }
-	    return results;
+	/**
+	 * Searches all locally cached questions by tag. This also checks tags of
+	 * answers belonging to the question.
+	 *
+	 * @param queryTag The tag string to search for
+	 * @return A set of Question objects that contain the tag
+	 */
+	public Set<Question> searchByTag(String queryTag) {
+		Set<Question> results = new HashSet<>();
+		String tagLower = queryTag.toLowerCase();
+
+		for (Question q : questionSet) {
+			for (String tag : q.getTags()) {
+				if (tag.toLowerCase().contains(tagLower)) {
+					results.add(q);
+					break;
+				}
+			}
+		}
+		return results;
 	}
 }
