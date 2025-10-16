@@ -24,8 +24,8 @@ public class StartCSE360 extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			databaseHelper.connectToDatabase(); 	// Connect to the database
-			questionManager.fetchQuestions(); 		// Populate questions from database
 			answerManager.fetchAnswers(); 			// Populate answers from database
+			questionManager.fetchQuestions(); 		// Populate questions from database
 			commentManager.fetchComments(); 		// Populate comments from database
 			if (databaseHelper.isDatabaseEmpty()) {
 				new FirstPage(databaseHelper).show(primaryStage);

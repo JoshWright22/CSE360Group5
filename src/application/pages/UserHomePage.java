@@ -12,6 +12,11 @@ import javafx.stage.Stage;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.List;
+import java.util.HashSet;
+import javafx.geometry.*;
 
 
 public class UserHomePage {	
@@ -32,12 +37,45 @@ public class UserHomePage {
     	else
     		userLabel = new Label("Hello, Anonymous!");
     	
+    	//creates a box to contain all questions
+        VBox questionsBox = new VBox(5);
+        populateQuestions(questionsBox, StartCSE360.getQuestionManager().getQuestionSet(), primaryStage);
+    	
+    	TextField searchField = new TextField();
+    	searchField.setPromptText("Search...");
+    	searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+    		if(newValue.isEmpty())
+    			populateQuestions(questionsBox, StartCSE360.getQuestionManager().getQuestionSet(), primaryStage);
+    	});
+    	searchField.setOnInputMethodTextChanged(e -> {
+    		if(searchField.getText().isEmpty())
+    			populateQuestions(questionsBox, StartCSE360.getQuestionManager().getQuestionSet(), primaryStage);
+    	});
+    	
+    	Button searchButton = new Button("Search");
+    	searchButton.setOnAction(e -> {
+    		String input = searchField.getText();
+    		if (!input.isEmpty())
+    		{	
+    			List<String> words = Arrays.asList(input.trim().split("\\s+"));
+    			System.out.println(words);
+    		
+        		Set<Question> questions = new HashSet<>();
+        		for (String s : words) {
+        		    questions.addAll(StartCSE360.getQuestionManager().searchByTag(s));
+        		}
+        		populateQuestions(questionsBox, questions, primaryStage);
+    		}
+    		else
+    			populateQuestions(questionsBox, StartCSE360.getQuestionManager().getQuestionSet(), primaryStage);
+        });
+    	
+    	HBox searchBox = new HBox(10);
+    	searchBox.getChildren().addAll(searchField, searchButton);
+    	searchBox.setAlignment(Pos.TOP_RIGHT);
+    	searchBox.setSpacing(10);
     	
         userLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-
-        //creates a box to contain all questions
-        VBox questionsBox = new VBox(5);
-        populateQuestions(questionsBox, primaryStage);
         
         //creates scroll pane for questions
         ScrollPane questionsScrollPane = new ScrollPane(questionsBox);
@@ -64,7 +102,7 @@ public class UserHomePage {
         
         VBox layout = new VBox(15);
         layout.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-        layout.getChildren().addAll(userLabel, questionsScrollPane, new Separator(), postBox);
+        layout.getChildren().addAll(userLabel, searchBox, questionsScrollPane, new Separator(), postBox);
         
         Scene userScene = new Scene(layout, 800, 400);
         primaryStage.setScene(userScene);
@@ -119,11 +157,11 @@ public class UserHomePage {
 		
 		questionsBox.getChildren().add(questionLabel);
     }
-    private void populateQuestions(VBox questionsBox, Stage primaryStage) 
+    private void populateQuestions(VBox questionsBox, Set<Question> questions, Stage primaryStage) 
     {
-        questionsBox.getChildren().clear(); // remove old entries
+        questionsBox.getChildren().clear();
 
-        for (Question question : StartCSE360.getQuestionManager().getQuestionSet()) 
+        for (Question question : questions) 
         {
         	addQuestionLabel(questionsBox, question, primaryStage);
         }

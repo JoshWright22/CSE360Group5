@@ -34,6 +34,9 @@ public class AnswerManager {
 	public void fetchAnswers() {
 		String query = "SELECT * FROM Answers";
 		try (ResultSet rs = this.database.getStatement().executeQuery(query)) {
+			
+			answerSet.clear();
+			
 			while (rs.next()) {
 				// Collect required information to construct Answer object
 				int id = rs.getInt("id");
@@ -63,7 +66,7 @@ public class AnswerManager {
 		
 		String query = "SELECT * FROM Answers WHERE id = ?";
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
-			stmt.setInt(0, id);
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				int i = rs.getInt("id");

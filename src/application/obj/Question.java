@@ -17,7 +17,19 @@ public class Question extends UserSubmission {
 
 	public Question(int id, String userName, LocalDateTime creationTime, String title, String content, List<Answer> answers,
 			List<String> tags) {
+		
 		super(id, userName, creationTime);
+		
+		//throw exception on invalid input
+		if (id <= 0)
+			throw new IllegalArgumentException("Id must be greater than 0");
+		if (title == null || title.trim().isEmpty())
+		    throw new IllegalArgumentException("Title cannot be empty");
+		if (content == null || content.trim().isEmpty())
+		    throw new IllegalArgumentException("Content cannot be empty");
+		if (userName == null || userName.trim().isEmpty())
+		    throw new IllegalArgumentException("Author cannot be empty");		
+		
 		this.title = title;
 		this.content = content;
 		if (this.answers == null)
@@ -59,6 +71,8 @@ public class Question extends UserSubmission {
 	 * @param title New title
 	 */
 	public void setTitle(String title) {
+		if (title == null || title.trim().isEmpty())
+		    throw new IllegalArgumentException("Title cannot be empty");
 		this.title = title;
 	}
 
@@ -68,6 +82,8 @@ public class Question extends UserSubmission {
 	 * @param content New content
 	 */
 	public void setContent(String content) {
+		if (content == null || content.trim().isEmpty())
+		    throw new IllegalArgumentException("Content cannot be empty");
 		this.content = content;
 	}
 
@@ -88,6 +104,12 @@ public class Question extends UserSubmission {
 		return result;
 	}
 
+	  /** Gets the tags of the question, for organizational and search functionality. */
+    public List<String> getTags() {
+        return Collections.unmodifiableList(this.tags);
+    }
+
+	
 	/**
 	 * Sets the tags of the question.
 	 * 

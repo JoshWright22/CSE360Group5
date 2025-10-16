@@ -57,7 +57,7 @@ public class QuestionPage {
 		postButton.setOnMouseClicked(e -> {
 			
 			Answer answer = StartCSE360.getAnswerManager().createNewAnswer(StartCSE360.getCurrentUser().getUserName(), LocalDateTime.now(), answerTextArea.getText());
-			question.addAnswers(answer);
+			StartCSE360.getQuestionManager().addAnswerToQuestion(question, answer);
 			addAnswerLabel(answerBox, answer);
 		});
 		
@@ -91,7 +91,7 @@ public class QuestionPage {
 	private void populateAnswerBox(VBox answerBox, Question question, List<Answer> answers)
 	{
 		answerBox.getChildren().clear();
-		for(Answer answer : question.getAnswers())
+		for(Answer answer : answers)
 		{
 			addAnswerLabel(answerBox, answer);
 		}
@@ -105,13 +105,13 @@ public class QuestionPage {
 		});
 		removeBox.getChildren().add(backButton);
 		removeBox.setAlignment(Pos.TOP_RIGHT);
-		if(StartCSE360.getCurrentUser().equals(question.getUserName()))
+		if(StartCSE360.getCurrentUser().getUserName().equals(question.getUserName()))
 		{
 			Button removeButton = new Button("X");
 			removeButton.setAlignment(Pos.BASELINE_RIGHT);
 			removeButton.setOnMouseClicked(e -> {
-				userHomePage.show(primaryStage);
 				StartCSE360.getQuestionManager().deleteQuestion(question);
+				userHomePage.show(primaryStage);
 			});
 			removeBox.getChildren().add(removeButton);
 		}

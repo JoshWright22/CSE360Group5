@@ -12,6 +12,7 @@ public class UserSubmission {
 	protected final LocalDateTime creationDate;
 	
 	public UserSubmission(int id, String userName, LocalDateTime creationDate) {
+
 		this.id = id;
 		this.userName = userName;
 		this.creationDate = creationDate;

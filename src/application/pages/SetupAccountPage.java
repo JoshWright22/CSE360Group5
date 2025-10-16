@@ -1,5 +1,6 @@
 package application.pages;
 
+import application.StartCSE360;
 import application.User;
 import application.UserRole;
 import application.eval.EmailEvaluator;
@@ -124,6 +125,7 @@ public class SetupAccountPage {
 					// Create a new user and register them in the database
 					User user = this.databaseHelper.createUser(userName, password, firstName, lastName,
 							email, UserRole.STUDENT);
+					StartCSE360.setCurrentUser(user);
 
 					// Navigate user to welcome page
 					new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
