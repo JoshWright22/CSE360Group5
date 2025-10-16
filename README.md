@@ -51,6 +51,8 @@ git clone https://github.com/JoshWright22/CSE360Group5.git
 * JUnit Tests: `tests/application/`
 * Recordings: Screencasts demonstrating functional requirements and team collaboration
 * PDF Submission: `TP2-Submission-Template.docx`
+* Code review screencast: [YouTube link](https://youtu.be/BsA6Mftx-48)
+* Program demo screencast: <link_here>
 
 ## Project Tasks
 
