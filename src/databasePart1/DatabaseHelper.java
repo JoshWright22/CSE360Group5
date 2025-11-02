@@ -1,10 +1,6 @@
 package databasePart1;
 
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.UUID;
 
 import application.User;
@@ -46,72 +42,61 @@ public class DatabaseHelper {
 
 	private void createTables() throws SQLException {
 		// Create the users table
-		String userTable = "CREATE TABLE IF NOT EXISTS cse360users ("
-				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "userName VARCHAR(255) UNIQUE, "
-				+ "password VARCHAR(255), "
-				+ "firstName VARCHAR(255), "
-				+ "lastName VARCHAR(255), "
-				+ "email VARCHAR(255), "
-				+ "role VARCHAR(20))";
+		String userTable = "CREATE TABLE IF NOT EXISTS cse360users (" + "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255) UNIQUE, " + "password VARCHAR(255), " + "firstName VARCHAR(255), "
+				+ "lastName VARCHAR(255), " + "email VARCHAR(255), " + "role VARCHAR(20))";
 		statement.execute(userTable);
 
 		// Create the invitation codes table
-		String invitationCodesTable = "CREATE TABLE IF NOT EXISTS InvitationCodes ("
-				+ "code VARCHAR(10) PRIMARY KEY, "
+		String invitationCodesTable = "CREATE TABLE IF NOT EXISTS InvitationCodes (" + "code VARCHAR(10) PRIMARY KEY, "
 				+ "isUsed BOOLEAN DEFAULT FALSE)";
 		statement.execute(invitationCodesTable);
-		
+
 		// Create the questions table
-		String questionsTable = "CREATE TABLE IF NOT EXISTS Questions ("
-				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "userName VARCHAR(255), "
-				+ "creationDate VARCHAR(255), "
-				+ "title VARCHAR(255), "
-				+ "content TEXT, "
-				+ "answers VARCHAR(255), "
-				+ "tags TEXT)";
+		String questionsTable = "CREATE TABLE IF NOT EXISTS Questions (" + "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255), " + "creationDate VARCHAR(255), " + "title VARCHAR(255), " + "content TEXT, "
+				+ "answers VARCHAR(255), " + "tags TEXT)";
 		statement.execute(questionsTable);
-		
+
 		// Create the answers table
-		String answersTable = "CREATE TABLE IF NOT EXISTS Answers ("
-				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "userName VARCHAR(255), "
-				+ "creationDate VARCHAR(255), "
-				+ "content TEXT)";
+		String answersTable = "CREATE TABLE IF NOT EXISTS Answers (" + "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255), " + "creationDate VARCHAR(255), " + "content TEXT)";
 		statement.execute(answersTable);
-		
+
 		// Create the comments table
-		String commentsTable = "CREATE TABLE IF NOT EXISTS Comments ("
-				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "userName VARCHAR(255), "
-				+ "creationDate VARCHAR(255), "
-				+ "content TEXT, "
-				+ "tags TEXT, "
+		String commentsTable = "CREATE TABLE IF NOT EXISTS Comments (" + "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255), " + "creationDate VARCHAR(255), " + "content TEXT, " + "tags TEXT, "
 				+ "parentId INT)";
 		statement.execute(commentsTable);
 	}
 
-	// Check if the database is empty
+	/**
+	 * Checks if the local database is empty by trying to select the first row from
+	 * the cse360users table.
+	 * 
+	 * @return true if first row exists (at least 1 {@link User} exists); false
+	 *         otherwise
+	 * @throws SQLException
+	 */
 	public boolean isDatabaseEmpty() throws SQLException {
-		String query = "SELECT COUNT(*) AS count FROM cse360users";
+		String query = "SELECT * FROM cse360users";
 		ResultSet resultSet = statement.executeQuery(query);
-		if (resultSet.next()) {
-			return resultSet.getInt("count") == 0;
-		}
-		return true;
+		if (resultSet.first())
+			return true;
+		else
+			return false;
 	}
-	
+
 	public Statement getStatement() {
 		return this.statement;
 	}
-	
+
 	public Connection getConnection() {
 		return this.connection;
 	}
-	
-	// PHASE 1 
-	
+
+	// PHASE 1
+
 	/**
 	 * Create a user by populating all fields.
 	 * 
@@ -121,14 +106,14 @@ public class DatabaseHelper {
 	 * @param lastName
 	 * @param email
 	 * @param role
-	 * @return	new User
+	 * @return new User
 	 */
 	public User createUser(String userName, String password, String firstName, String lastName, String email, UserRole role) {
 		if (this.doesUserExist(userName)) {
 			System.err.println("Attempted to create a user with a duplicate username.");
 			return null;
 		}
-		
+
 		String query = "INSERT INTO cse360users (userName, password, firstName, lastName, email, role) "
 				+ "VALUES (?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -143,24 +128,24 @@ public class DatabaseHelper {
 			System.err.println("Failed to register a user into the database.");
 			e.printStackTrace();
 		}
-		
+
 		return new User(userName, password, firstName, lastName, email, role);
 	}
-	
+
 	/**
 	 * Create a new user using only strictly-necessary details.
 	 * 
 	 * @param userName
 	 * @param password
 	 * @param role
-	 * @return	new User
+	 * @return new User
 	 */
 	public User createUser(String userName, String password, UserRole role) {
 		return this.createUser(userName, password, "", "", "", role);
 	}
 
 	public void registerUser(User user) {
-		
+
 		String query = "INSERT INTO cse360users (userName, password, firstName, lastName, email, role) "
 				+ "VALUES (?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -176,12 +161,12 @@ public class DatabaseHelper {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Validates a user's login.
 	 * 
 	 * @param user
-	 * @return	true if validation succeeds; false otherwise
+	 * @return true if validation succeeds; false otherwise
 	 * @throws SQLException
 	 */
 	public boolean login(User user) throws SQLException {
@@ -195,12 +180,12 @@ public class DatabaseHelper {
 			}
 		}
 	}
-	
+
 	/**
 	 * Attempts to fetch a user from the database given their userName.
 	 * 
 	 * @param userName
-	 * @return	User object with matching username if found; NULL otherwise
+	 * @return User object with matching username if found; NULL otherwise
 	 */
 	public User fetchUser(String userName) {
 		String query = "SELECT * FROM cse360users WHERE userName = ?";
@@ -210,10 +195,9 @@ public class DatabaseHelper {
 			stmt.executeQuery();
 			ResultSet rs = stmt.getResultSet();
 			if (rs.next()) {
-				user = new User(rs.getString("userName"), rs.getString("password"),
-								rs.getString("firstName"), rs.getString("lastName"), rs.getString("email"),
-								UserRole.valueOf(rs.getString("role")));
-			} 
+				user = new User(rs.getString("userName"), rs.getString("password"), rs.getString("firstName"),
+						rs.getString("lastName"), rs.getString("email"), UserRole.valueOf(rs.getString("role")));
+			}
 		} catch (SQLException e) {
 			System.err.println("Failed to fetch a user from the database.");
 			e.printStackTrace();
@@ -225,7 +209,7 @@ public class DatabaseHelper {
 	 * Checks if a user already exists in the database based on their UserName.
 	 * 
 	 * @param userName
-	 * @return	true if the user exists; false otherwise
+	 * @return true if the user exists; false otherwise
 	 */
 	public boolean doesUserExist(String userName) {
 		String query = "SELECT COUNT(*) FROM cse360users WHERE userName = ?";
