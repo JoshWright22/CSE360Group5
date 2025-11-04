@@ -2,7 +2,7 @@
 
 ## About
 
-This repository contains the source code, tests, and documentation for CSE360 Team Project 1 (Fall 2025). The project implements a secure, user-role based question-and-answer system for ASU students. Key goals include:
+This repository contains the source code, tests, and documentation for the CSE360 Team Project (Fall 2025). The project implements a secure, role-based question-and-answer system for ASU students. Key goals include:
 
 * Secure login and identity management
 * User account management (name, email, password)
@@ -17,12 +17,11 @@ This repository contains the source code, tests, and documentation for CSE360 Te
 CSE360Group5/
 ├─ src/application/        # JavaFX source code
 ├─ tests/application/      # JUnit test cases
-├─ Recordings/             # Screencasts and stand-up recordings
+├─ screencasts/            # Screencasts and stand-up recordings
 ├─ .classpath
 ├─ .project
 ├─ .settings/
-├─ README.md               # Project README
-└─ TP1-Submission-Template.docx  # PDF submission template
+└─ README.md               # Project README
 ```
 
 ## Contributors

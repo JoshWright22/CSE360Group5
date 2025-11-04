@@ -1,0 +1,14 @@
+9/19 Scrum Meeting 2 Notes
+Confirmed that standup notes are being taken and posted in chat
+Discussed whether team norms should be in GitHub or just the deliverable (decided Appendix B in PDF is sufficient); signatures added as names at bottom
+Appendix A being filled with individual contributions (six tasks per member)
+Missing pieces: automated tests and input validation; JUnit considered but not strictly required, team leaning toward using it
+Screencasts clarified:
+Technical explanation of code
+Walkthrough of code execution
+Planning and division of work (all members must present)
+Testing demonstration
+Agreed to finish input validation and automated tests by tomorrow or Sunday
+Third screencast (team planning) recorded together during meeting; remaining screencasts assigned to individuals
+GitHub code confirmed as up-to-date; members sharing work via repo and Discord if needed
+Team comfortable finalizing asynchronously in chat after today’s joint recording
