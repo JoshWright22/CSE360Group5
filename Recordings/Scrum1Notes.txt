@@ -1,0 +1,11 @@
+9/18 Scrum Meeting 1 Notes
+
+-Chose project theme: a Reddit-style forum app with user and admin roles
+-Team norms drafted and nearly complete; each member adds about two norms
+-Shared agreement on user experience: scrollable message board, users can post, admins can delete posts or threads
+-Building on homework one (foundation code), adding UI and database adjustments if needed
+-Input validation will reuse homework one’s work; written section nearly complete
+-Screencasts will demonstrate working code and changes made
+-GitHub repo set to public for easier sharing
+-Deadline confirmed as Sunday
+-Next meeting scheduled for tomorrow at 3:00 PM PST
