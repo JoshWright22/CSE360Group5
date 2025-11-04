@@ -1,11 +1,15 @@
 package application;
 
+import application.pages.AdminHomePage;
+import application.pages.InvitationPage;
+import application.pages.UserHomePage;
+import databasePart1.DatabaseHelper;
+import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.application.Platform;
-import databasePart1.*;
 
 /**
  * The WelcomeLoginPage class displays a welcome screen for authenticated users.
@@ -29,13 +33,12 @@ public class WelcomeLoginPage {
 	    // Button to navigate to the user's respective page based on their role
 	    Button continueButton = new Button("Continue to your Page");
 	    continueButton.setOnAction(a -> {
-	    	String role =user.getRole();
-	    	System.out.println(role);
+	    	UserRole role = user.getRole();
+	    	System.out.println(role.toString());
 	    	
-	    	if(role.equals("admin")) {
+	    	if(role == UserRole.ADMIN) {
 	    		new AdminHomePage().show(primaryStage);
-	    	}
-	    	else if(role.equals("user")) {
+	    	} else if(role == UserRole.STUDENT) {
 	    		new UserHomePage().show(primaryStage);
 	    	}
 	    });
@@ -48,10 +51,10 @@ public class WelcomeLoginPage {
 	    });
 	    
 	    // "Invite" button for admin to generate invitation codes
-	    if ("admin".equals(user.getRole())) {
+	    if (user.getRole() == UserRole.ADMIN) {
             Button inviteButton = new Button("Invite");
             inviteButton.setOnAction(a -> {
-                new InvitationPage().show(databaseHelper, primaryStage);
+                new InvitationPage().show(databaseHelper, primaryStage, user);
             });
             layout.getChildren().add(inviteButton);
         }
