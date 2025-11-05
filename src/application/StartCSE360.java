@@ -14,6 +14,8 @@ public class StartCSE360 extends Application {
 	private static final QuestionManager questionManager = new QuestionManager(databaseHelper);
 	private static final AnswerManager answerManager = new AnswerManager(databaseHelper);
 	private static final CommentManager commentManager = new CommentManager(databaseHelper);
+	private static final ReviewManager reviewManager = new ReviewManager(databaseHelper);
+
 	private static User currentUser = null;
 
 	public static void main(String[] args) {
@@ -27,6 +29,8 @@ public class StartCSE360 extends Application {
 			answerManager.fetchAnswers(); 			// Populate answers from database
 			questionManager.fetchQuestions(); 		// Populate questions from database
 			commentManager.fetchComments(); 		// Populate comments from database
+			reviewManager.fetchReviews();           // Populate reviews from database
+
 			if (databaseHelper.isDatabaseEmpty()) {
 				new FirstPage(databaseHelper).show(primaryStage);
 			} else {
@@ -60,4 +64,9 @@ public class StartCSE360 extends Application {
 	{
 		return currentUser;
 	}
+	public static ReviewManager getReviewManager() 
+	{
+    	return reviewManager;
+	}
+
 }
