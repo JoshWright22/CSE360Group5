@@ -11,10 +11,6 @@ import java.util.Set;
 import databasePart1.DatabaseHelper;
 import application.obj.ReviewerProfile;
 
-/**
- * Manages reviewer profiles with database persistence.
- * Fetches existing profiles, creates new ones if needed, and allows updates.
- */
 public class ReviewerProfileManager {
 
     private final DatabaseHelper database;
@@ -22,12 +18,36 @@ public class ReviewerProfileManager {
 
     public ReviewerProfileManager(DatabaseHelper database) {
         this.database = database;
+        createTableIfNotExists();
         fetchProfiles();
     }
 
-    /**
-     * Fetches all reviewer profiles from the database.
-     */
+    private void createTableIfNotExists() {
+        if (database.getConnection() == null) {
+            System.err.println("Database connection is null. Cannot create table.");
+            return;
+        }
+
+        String sql = """
+                    CREATE TABLE IF NOT EXISTS ReviewerProfiles (
+                        userName VARCHAR(255) PRIMARY KEY,
+                        bio VARCHAR(1000),
+                        expertise VARCHAR(255),
+                        yearsExperience INT,
+                        totalReviews INT,
+                        averageRating DOUBLE
+                    )
+                """;
+
+        try (Statement stmt = database.getConnection().createStatement()) {
+            stmt.execute(sql);
+            System.out.println("ReviewerProfiles table is ready.");
+        } catch (SQLException e) {
+            System.err.println("Failed to create ReviewerProfiles table.");
+            e.printStackTrace();
+        }
+    }
+
     public void fetchProfiles() {
         if (database.getConnection() == null) {
             System.err.println("Database connection is null. Cannot fetch profiles.");
@@ -36,24 +56,18 @@ public class ReviewerProfileManager {
 
         String query = "SELECT * FROM ReviewerProfiles";
         try (Statement stmt = database.getConnection().createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
+                ResultSet rs = stmt.executeQuery(query)) {
 
             profileSet.clear();
 
             while (rs.next()) {
                 String userName = rs.getString("userName");
-                String bio = rs.getString("bio");
-                String expertise = rs.getString("expertise");
-                int yearsExperience = rs.getInt("yearsExperience");
-                int totalReviews = rs.getInt("totalReviews");
-                double averageRating = rs.getDouble("averageRating");
-
                 ReviewerProfile profile = new ReviewerProfile(userName);
-                profile.setBio(bio);
-                profile.setExpertise(expertise);
-                profile.setYearsExperience(yearsExperience);
-                profile.setTotalReviews(totalReviews);
-                profile.setAverageRating(averageRating);
+                profile.setBio(rs.getString("bio"));
+                profile.setExpertise(rs.getString("expertise"));
+                profile.setYearsExperience(rs.getInt("yearsExperience"));
+                profile.setTotalReviews(rs.getInt("totalReviews"));
+                profile.setAverageRating(rs.getDouble("averageRating"));
 
                 profileSet.add(profile);
             }
@@ -63,21 +77,39 @@ public class ReviewerProfileManager {
         }
     }
 
-    /**
-     * Retrieves an existing profile or creates a new one if not found.
-     */
     public ReviewerProfile getOrCreateProfile(String userName) {
+        // Check in-memory first
         for (ReviewerProfile profile : profileSet) {
             if (profile.getUserName().equals(userName)) {
                 return profile;
             }
         }
 
-        ReviewerProfile newProfile = new ReviewerProfile(userName);
-
+        // Check database for existing profile
         if (database.getConnection() != null) {
-            String query = "INSERT INTO ReviewerProfiles (userName, bio, expertise, yearsExperience, totalReviews, averageRating) VALUES (?, ?, ?, ?, ?, ?)";
+            String query = "SELECT * FROM ReviewerProfiles WHERE userName = ?";
             try (PreparedStatement stmt = database.getConnection().prepareStatement(query)) {
+                stmt.setString(1, userName);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    ReviewerProfile profile = new ReviewerProfile(userName);
+                    profile.setBio(rs.getString("bio"));
+                    profile.setExpertise(rs.getString("expertise"));
+                    profile.setYearsExperience(rs.getInt("yearsExperience"));
+                    profile.setTotalReviews(rs.getInt("totalReviews"));
+                    profile.setAverageRating(rs.getDouble("averageRating"));
+                    profileSet.add(profile);
+                    return profile;
+                }
+            } catch (SQLException e) {
+                System.err.println("Failed to check database for profile: " + userName);
+                e.printStackTrace();
+            }
+
+            // Insert new profile if it does not exist
+            ReviewerProfile newProfile = new ReviewerProfile(userName);
+            String insert = "INSERT INTO ReviewerProfiles (userName, bio, expertise, yearsExperience, totalReviews, averageRating) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement stmt = database.getConnection().prepareStatement(insert)) {
                 stmt.setString(1, userName);
                 stmt.setString(2, "");
                 stmt.setString(3, "");
@@ -89,15 +121,16 @@ public class ReviewerProfileManager {
                 System.err.println("Failed to create new reviewer profile for " + userName);
                 e.printStackTrace();
             }
+            profileSet.add(newProfile);
+            return newProfile;
         }
 
-        profileSet.add(newProfile);
-        return newProfile;
+        // Fallback if database is null
+        ReviewerProfile fallbackProfile = new ReviewerProfile(userName);
+        profileSet.add(fallbackProfile);
+        return fallbackProfile;
     }
 
-    /**
-     * Updates an existing profile in the database.
-     */
     public void updateProfile(ReviewerProfile profile) {
         if (database.getConnection() == null) {
             System.err.println("Database connection is null. Cannot update profile.");
@@ -119,9 +152,6 @@ public class ReviewerProfileManager {
         }
     }
 
-    /**
-     * Returns all profiles as an unmodifiable set.
-     */
     public Set<ReviewerProfile> getProfiles() {
         return Collections.unmodifiableSet(profileSet);
     }
