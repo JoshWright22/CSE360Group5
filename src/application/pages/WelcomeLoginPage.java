@@ -16,54 +16,60 @@ import databasePart1.*;
  */
 public class WelcomeLoginPage {
 
-	private final DatabaseHelper databaseHelper;
+    private final DatabaseHelper databaseHelper;
 
-	public WelcomeLoginPage(DatabaseHelper databaseHelper) {
-		this.databaseHelper = databaseHelper;
-	}
+    public WelcomeLoginPage(DatabaseHelper databaseHelper) {
+        this.databaseHelper = databaseHelper;
+    }
 
-	public void show(Stage primaryStage, User user) {
+    public void show(Stage primaryStage, User user) {
 
-		VBox layout = new VBox(5);
-		layout.setStyle("-fx-alignment: center; -fx-padding: 20;");
+        VBox layout = new VBox(5);
+        layout.setStyle("-fx-alignment: center; -fx-padding: 20;");
 
-		Label welcomeLabel = new Label("Welcome!!");
-		welcomeLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        Label welcomeLabel = new Label("Welcome, " + user.getUserName() + "!");
+        welcomeLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-		// Button to navigate to the user's respective page based on their role
-		Button continueButton = new Button("Continue to your Page");
-		continueButton.setOnAction(a -> {
-			UserRole role = user.getRole();
-			System.out.println(role);
+        // Button to navigate to the user's respective page based on their role
+        Button continueButton = new Button("Continue to your Page");
+        continueButton.setOnAction(a -> {
+            UserRole role = user.getRole();
+            System.out.println(role);
 
-			if (role == UserRole.ADMIN) {
-				new AdminHomePage().show(primaryStage);
-			} else if (role == UserRole.STUDENT) {
-				new UserHomePage().show(primaryStage);
-			} 
-		});
+            switch (role) {
+                case ADMIN:
+                    new AdminHomePage().show(primaryStage);
+                    break;
+                case STUDENT:
+                case REVIEWER: // reviewers go to the same home page but get extra navigation
+                    new UserHomePage().show(primaryStage);
+                    break;
+                default:
+                    new UserHomePage().show(primaryStage);
+                    break;
+            }
+        });
 
-		// Button to quit the application
-		Button quitButton = new Button("Quit");
-		quitButton.setOnAction(a -> {
-			databaseHelper.closeConnection();
-			Platform.exit(); // Exit the JavaFX application
-		});
+        // Button to quit the application
+        Button quitButton = new Button("Quit");
+        quitButton.setOnAction(a -> {
+            databaseHelper.closeConnection();
+            Platform.exit();
+        });
 
-		// "Invite" button for admin to generate invitation codes
-		if (user.getRole() == UserRole.ADMIN) {
-			Button inviteButton = new Button("Invite");
-			inviteButton.setOnAction(a -> {
-				new InvitationPage().show(databaseHelper, primaryStage, user);
-			});
-			layout.getChildren().add(inviteButton);
-		}
+        // "Invite" button for admin to generate invitation codes
+        if (user.getRole() == UserRole.ADMIN) {
+            Button inviteButton = new Button("Invite");
+            inviteButton.setOnAction(a -> {
+                new InvitationPage().show(databaseHelper, primaryStage, user);
+            });
+            layout.getChildren().add(inviteButton);
+        }
 
-		layout.getChildren().addAll(welcomeLabel, continueButton, quitButton);
-		Scene welcomeScene = new Scene(layout, 800, 400);
+        layout.getChildren().addAll(welcomeLabel, continueButton, quitButton);
 
-		// Set the scene to primary stage
-		primaryStage.setScene(welcomeScene);
-		primaryStage.setTitle("Welcome Page");
-	}
+        Scene welcomeScene = new Scene(layout, 800, 400);
+        primaryStage.setScene(welcomeScene);
+        primaryStage.setTitle("Welcome Page");
+    }
 }
