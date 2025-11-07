@@ -1,10 +1,6 @@
 package databasePart1;
 
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.UUID;
 
 import application.User;
@@ -27,7 +23,6 @@ public class DatabaseHelper {
 
 	private Connection connection = null;
 	private Statement statement = null;
-	// PreparedStatement pstmt
 
 	public void connectToDatabase() throws SQLException {
 		try {
@@ -35,10 +30,8 @@ public class DatabaseHelper {
 			System.out.println("Connecting to database...");
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement();
-			// You can use this command to clear the database and restart from fresh.
-			//statement.execute("DROP ALL OBJECTS");
 
-			createTables(); // Create the necessary tables if they don't exist
+			createTables(); // Create tables if they don't exist
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}
@@ -61,7 +54,7 @@ public class DatabaseHelper {
 				+ "code VARCHAR(10) PRIMARY KEY, "
 				+ "isUsed BOOLEAN DEFAULT FALSE)";
 		statement.execute(invitationCodesTable);
-		
+
 		// Create the questions table
 		String questionsTable = "CREATE TABLE IF NOT EXISTS Questions ("
 				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
@@ -72,7 +65,7 @@ public class DatabaseHelper {
 				+ "answers VARCHAR(255), "
 				+ "tags TEXT)";
 		statement.execute(questionsTable);
-		
+
 		// Create the answers table
 		String answersTable = "CREATE TABLE IF NOT EXISTS Answers ("
 				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
@@ -80,7 +73,7 @@ public class DatabaseHelper {
 				+ "creationDate VARCHAR(255), "
 				+ "content TEXT)";
 		statement.execute(answersTable);
-		
+
 		// Create the comments table
 		String commentsTable = "CREATE TABLE IF NOT EXISTS Comments ("
 				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
@@ -90,43 +83,65 @@ public class DatabaseHelper {
 				+ "tags TEXT, "
 				+ "parentId INT)";
 		statement.execute(commentsTable);
+
+		// Create the reviews table
+		String reviewsTable = "CREATE TABLE IF NOT EXISTS Reviews ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255), "
+				+ "productId INT, "
+				+ "rating INT, "
+				+ "comment TEXT, "
+				+ "creationDate VARCHAR(255))";
+		statement.execute(reviewsTable);
+
+		// Create the ReviewerProfiles table
+		String reviewerProfilesTable = "CREATE TABLE IF NOT EXISTS ReviewerProfiles ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "userName VARCHAR(255) UNIQUE, "
+				+ "bio TEXT, "
+				+ "expertise VARCHAR(255), "
+				+ "yearsExperience INT, "
+				+ "totalReviews INT DEFAULT 0, "
+				+ "averageRating DOUBLE DEFAULT 0.0)";
+		statement.execute(reviewerProfilesTable);
+
+		// Create the Messages table
+		String messagesTable = "CREATE TABLE IF NOT EXISTS Messages ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "senderName VARCHAR(255), "
+				+ "receiverName VARCHAR(255), "
+				+ "content TEXT, "
+				+ "sentTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+				+ "isRead BOOLEAN DEFAULT FALSE)";
+		statement.execute(messagesTable);
 	}
 
-	// Check if the database is empty
 	public boolean isDatabaseEmpty() throws SQLException {
 		String query = "SELECT * FROM cse360users";
 		ResultSet resultSet = statement.executeQuery(query);
-		if (!resultSet.first()) return true;
-		else return false;
+		if (resultSet.first())
+			return true;
+		else
+			return false;
 	}
-	
+
 	public Statement getStatement() {
 		return this.statement;
 	}
-	
+
 	public Connection getConnection() {
 		return this.connection;
 	}
-	
-	// PHASE 1 
-	
-	/**
-	 * Create a user by populating all fields.
-	 * 
-	 * @param userName
-	 * @param password
-	 * @param firstName
-	 * @param lastName
-	 * @param email
-	 * @param role
-	 * @return	new User
-	 */
-	public User createUser(String userName, String password, String firstName, String lastName, String email, UserRole role) {
+
+	// PHASE 1: User operations
+
+	public User createUser(String userName, String password, String firstName, String lastName, String email,
+			UserRole role) {
 		if (this.doesUserExist(userName)) {
 			System.err.println("Attempted to create a user with a duplicate username.");
 			return null;
 		}
-		
+
 		String query = "INSERT INTO cse360users (userName, password, firstName, lastName, email, role) "
 				+ "VALUES (?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -141,24 +156,15 @@ public class DatabaseHelper {
 			System.err.println("Failed to register a user into the database.");
 			e.printStackTrace();
 		}
-		
+
 		return new User(userName, password, firstName, lastName, email, role);
 	}
-	
-	/**
-	 * Create a new user using only strictly-necessary details.
-	 * 
-	 * @param userName
-	 * @param password
-	 * @param role
-	 * @return	new User
-	 */
+
 	public User createUser(String userName, String password, UserRole role) {
 		return this.createUser(userName, password, "", "", "", role);
 	}
 
 	public void registerUser(User user) {
-		
 		String query = "INSERT INTO cse360users (userName, password, firstName, lastName, email, role) "
 				+ "VALUES (?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -174,14 +180,7 @@ public class DatabaseHelper {
 			e.printStackTrace();
 		}
 	}
-	
-	/**
-	 * Validates a user's login.
-	 * 
-	 * @param user
-	 * @return	true if validation succeeds; false otherwise
-	 * @throws SQLException
-	 */
+
 	public boolean login(User user) throws SQLException {
 		String query = "SELECT * FROM cse360users WHERE userName = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -193,25 +192,18 @@ public class DatabaseHelper {
 			}
 		}
 	}
-	
-	/**
-	 * Attempts to fetch a user from the database given their userName.
-	 * 
-	 * @param userName
-	 * @return	User object with matching username if found; NULL otherwise
-	 */
+
 	public User fetchUser(String userName) {
 		String query = "SELECT * FROM cse360users WHERE userName = ?";
 		User user = null;
 		try (PreparedStatement stmt = connection.prepareStatement(query)) {
 			stmt.setString(1, userName);
-			stmt.executeQuery();
-			ResultSet rs = stmt.getResultSet();
+			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				user = new User(rs.getString("userName"), rs.getString("password"),
-								rs.getString("firstName"), rs.getString("lastName"), rs.getString("email"),
-								UserRole.valueOf(rs.getString("role")));
-			} 
+						rs.getString("firstName"), rs.getString("lastName"), rs.getString("email"),
+						UserRole.valueOf(rs.getString("role")));
+			}
 		} catch (SQLException e) {
 			System.err.println("Failed to fetch a user from the database.");
 			e.printStackTrace();
@@ -219,91 +211,70 @@ public class DatabaseHelper {
 		return user;
 	}
 
-	/**
-	 * Checks if a user already exists in the database based on their UserName.
-	 * 
-	 * @param userName
-	 * @return	true if the user exists; false otherwise
-	 */
 	public boolean doesUserExist(String userName) {
 		String query = "SELECT COUNT(*) FROM cse360users WHERE userName = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-
 			pstmt.setString(1, userName);
 			ResultSet rs = pstmt.executeQuery();
-
 			if (rs.next()) {
-				// If the count is greater than 0, the user exists
 				return rs.getInt(1) > 0;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return false; // If an error occurs, assume user doesn't exist
+		return false;
 	}
 
-	/**
-	 * Retrieves the role of a user from the database using their UserName.
-	 * 
-	 * @param userName
-	 * @return
-	 */
 	public UserRole getUserRole(String userName) {
 		String query = "SELECT role FROM cse360users WHERE userName = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, userName);
 			ResultSet rs = pstmt.executeQuery();
-
 			if (rs.next()) {
-				return UserRole.valueOf(rs.getString("role").toUpperCase()); // Return the role if user exists
+				return UserRole.valueOf(rs.getString("role").toUpperCase());
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return null; // If no user exists or an error occurs
+		return null;
 	}
-	
-	public void updateUserRole(String userName, UserRole newRole){
-	    String query = "UPDATE cse360users SET role = ? WHERE userName = ?";
 
-	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-	        pstmt.setString(1, newRole.toString());
-	        pstmt.setString(2, userName);
+	public void updateUserRole(String userName, UserRole newRole) {
+		String query = "UPDATE cse360users SET role = ? WHERE userName = ?";
 
-	        int rowsUpdated = pstmt.executeUpdate();
-	        if (rowsUpdated == 0) {
-	            System.out.println("No user found with username: " + userName);
-	        } else {
-	            System.out.println("Updated role for user: " + userName + " to " + newRole);
-	        }
-	    } catch (SQLException e) {
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, newRole.toString());
+			pstmt.setString(2, userName);
+
+			int rowsUpdated = pstmt.executeUpdate();
+			if (rowsUpdated == 0) {
+				System.out.println("No user found with username: " + userName);
+			} else {
+				System.out.println("Updated role for user: " + userName + " to " + newRole);
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	// Generates a new invitation code and inserts it into the database.
 	public String generateInvitationCode() {
-		String code = UUID.randomUUID().toString().substring(0, 4); // Generate a random 4-character code
+		String code = UUID.randomUUID().toString().substring(0, 4);
 		String query = "INSERT INTO InvitationCodes (code) VALUES (?)";
-
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, code);
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
 		return code;
 	}
 
-	// Validates an invitation code to check if it is unused.
 	public boolean validateInvitationCode(String code) {
 		String query = "SELECT * FROM InvitationCodes WHERE code = ? AND isUsed = FALSE";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, code);
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
-				// Mark the code as used
 				markInvitationCodeAsUsed(code);
 				return true;
 			}
@@ -313,7 +284,6 @@ public class DatabaseHelper {
 		return false;
 	}
 
-	// Marks the invitation code as used in the database.
 	private void markInvitationCodeAsUsed(String code) {
 		String query = "UPDATE InvitationCodes SET isUsed = TRUE WHERE code = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -324,7 +294,6 @@ public class DatabaseHelper {
 		}
 	}
 
-	// Closes the database connection and statement.
 	public void closeConnection() {
 		try {
 			if (statement != null)
