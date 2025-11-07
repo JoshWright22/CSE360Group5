@@ -22,7 +22,7 @@ public class Answer extends UserSubmission {
 	/**
 	 * Gets the content of the answer.
 	 * 
-	 * @return String
+	 * @return String - Content of the answer
 	 */
 	public String getContent() {
 		return this.content;
@@ -31,7 +31,7 @@ public class Answer extends UserSubmission {
 	/**
 	 * Gets the tags of the answer, for organizational and search functionality.
 	 * 
-	 * @return
+	 * @return List<String> - Unmodifiable list of tags
 	 */
 	public List<String> getTags() {
 		return Collections.unmodifiableList(this.tags);
