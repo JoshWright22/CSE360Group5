@@ -7,13 +7,20 @@ import org.junit.jupiter.api.Test;
 
 import application.eval.UserNameRecognizer;
 
+/**
+ * This class consists of methods created to test various parts of username validation.
+ */
 public class UserNameRecognizerTest {
+	
 	String firstCharacterError = "A UserName must start with A-Z or a-z.";
 	String minCharacterError = "A UserName must have at least 4 characters.";
 	String maxCharacterError = "A UserName must have no more than 16 character.";
 	String invalidCharacterError = "A UserName character may only contain the characters A-Z, a-z, 0-9.";
 	String specialCharacterError = "A UserName character after a period, underscore, or dash must be A-Z, a-z, or 0-9.";
 
+	/**
+	 * This test checks that empty Strings are not accepted as valid usernames.
+	 */
 	@Test
 	void testEmptyUserName() {
 		String userName = "";
@@ -25,6 +32,9 @@ public class UserNameRecognizerTest {
 		assertTrue(error.isEmpty(), "");
 	}
 
+	/**
+	 * This test checks that the first character of a username is alphabetical.
+	 */
 	@Test
 	void testFirstCharacterIsAlphabetical() {
 		String userName = "Justin";
@@ -40,6 +50,9 @@ public class UserNameRecognizerTest {
 		assertTrue(error.contains(firstCharacterError), firstCharacterError);
 	}
 
+	/**
+	 * This test checks that special characters do not occur consecutively in usernames.
+	 */
 	@Test
 	void testSpecialCharactersAreNotConsecutive() {
 		String userName = "Be.th";
@@ -59,6 +72,9 @@ public class UserNameRecognizerTest {
 		assertTrue(error.contains(specialCharacterError), specialCharacterError);
 	}
 
+	/**
+	 * This test checks that usernames meet the minimum length requirement.
+	 */
 	@Test
 	void testMinLength() {
 		String userName = "Tamara";
@@ -74,6 +90,9 @@ public class UserNameRecognizerTest {
 		assertTrue(error.contains(minCharacterError), minCharacterError);
 	}
 
+	/**
+	 * This test checks that usernames do not exceed the maximum length.
+	 */
 	@Test
 	void testMaxLength() {
 		String userName = "Christopher12345";
@@ -85,6 +104,9 @@ public class UserNameRecognizerTest {
 		assertTrue(error.contains(maxCharacterError), maxCharacterError);
 	}
 
+	/**
+	 * This test checks that invalid characters (such as brackets) are properly rejected.
+	 */
 	@Test
 	void testInvalidCharacters() {
 		String userName = "Dave[]12";
