@@ -15,7 +15,10 @@ public class StartCSE360 extends Application {
 	private static final AnswerManager answerManager = new AnswerManager(databaseHelper);
 	private static final CommentManager commentManager = new CommentManager(databaseHelper);
 	private static final ReviewManager reviewManager = new ReviewManager(databaseHelper);
-
+	private static final ReviewerProfileManager reviewProfileManager = new ReviewerProfileManager(databaseHelper);
+	private static final MessageManager messageManager = new MessageManager(databaseHelper);
+	
+	
 	private static User currentUser = null;
 
 	public static void main(String[] args) {
@@ -68,5 +71,13 @@ public class StartCSE360 extends Application {
 	{
     	return reviewManager;
 	}
+	
+	public static ReviewerProfileManager getReviewerProfileManager() {
+	    return reviewProfileManager;
+	}
+	
+	public static MessageManager getMessageManager() {
+        return messageManager;
+    }
 
 }
