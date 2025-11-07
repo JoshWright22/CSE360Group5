@@ -36,7 +36,7 @@ public class DatabaseHelper {
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement();
 			// You can use this command to clear the database and restart from fresh.
-			statement.execute("DROP ALL OBJECTS");
+			//statement.execute("DROP ALL OBJECTS");
 
 			createTables(); // Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {
@@ -96,7 +96,7 @@ public class DatabaseHelper {
 	public boolean isDatabaseEmpty() throws SQLException {
 		String query = "SELECT * FROM cse360users";
 		ResultSet resultSet = statement.executeQuery(query);
-		if (resultSet.first()) return true;
+		if (!resultSet.first()) return true;
 		else return false;
 	}
 	
@@ -261,6 +261,24 @@ public class DatabaseHelper {
 			e.printStackTrace();
 		}
 		return null; // If no user exists or an error occurs
+	}
+	
+	public void updateUserRole(String userName, UserRole newRole){
+	    String query = "UPDATE cse360users SET role = ? WHERE userName = ?";
+
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        pstmt.setString(1, newRole.toString());
+	        pstmt.setString(2, userName);
+
+	        int rowsUpdated = pstmt.executeUpdate();
+	        if (rowsUpdated == 0) {
+	            System.out.println("No user found with username: " + userName);
+	        } else {
+	            System.out.println("Updated role for user: " + userName + " to " + newRole);
+	        }
+	    } catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Generates a new invitation code and inserts it into the database.
