@@ -19,7 +19,6 @@ import databasePart1.DatabaseHelper;
  * Acts as a manager class for dealing with Review objects. This use of data hiding and encapsulation helps ensure parity
  * between data stored in the local cache and data stored on the MySQL database.
  */
-
 public class ReviewManager {
 
 	private final DatabaseHelper database;
@@ -31,7 +30,6 @@ public class ReviewManager {
 	/**
 	 * Attempts to fetch all data from the Reviews table.
 	 */
-  
 	public void fetchReviews() {
 		String query = "SELECT * FROM Reviews";
 		try (ResultSet rs = this.database.getStatement().executeQuery(query)) {
@@ -69,7 +67,6 @@ public class ReviewManager {
 	 * @param id ID of review whose data will be fetched
 	 * @return Review object constructed from database data
 	 */
-  
 	public Review fetchReview(int id) {
 		Review result = null;
 		
@@ -107,7 +104,6 @@ public class ReviewManager {
 	 * 
 	 * @return Unmodifiable set containing local reviews
 	 */
-  
 	public Set<Review> getReviewSet() {
 		return Collections.unmodifiableSet(this.reviewSet);
 	}
@@ -118,7 +114,6 @@ public class ReviewManager {
 	 * @param userName Name of the reviewer
 	 * @return Set of reviews by the specified user
 	 */
-  
 	public Set<Review> getReviewsByUser(String userName) {
 		return reviewSet.stream()
 				.filter(r -> r.getUserName().equals(userName))
@@ -131,7 +126,6 @@ public class ReviewManager {
 	 * @param questionId ID of the question
 	 * @return Set of reviews for the specified question
 	 */
-  
 	public Set<Review> getReviewsForQuestion(int questionId) {
 		return reviewSet.stream()
 				.filter(r -> r.isQuestionReview() && r.getReviewedQuestion().getId() == questionId)
@@ -144,7 +138,6 @@ public class ReviewManager {
 	 * @param answerId ID of the answer
 	 * @return Set of reviews for the specified answer
 	 */
-  
 	public Set<Review> getReviewsForAnswer(int answerId) {
 		return reviewSet.stream()
 				.filter(r -> r.isAnswerReview() && r.getReviewedAnswer().getId() == answerId)
@@ -224,7 +217,6 @@ public class ReviewManager {
 	 * 
 	 * @param review Review to update
 	 */
-  
 	public void updateReview(Review review) {
 		String query = "UPDATE Reviews SET content = ?, rating = ? WHERE id = ?";
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
@@ -243,7 +235,6 @@ public class ReviewManager {
 	 * 
 	 * @param review Review to delete
 	 */
-  
 	public void deleteReview(Review review) {
 		String query = "DELETE FROM Reviews WHERE id = ?";
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
