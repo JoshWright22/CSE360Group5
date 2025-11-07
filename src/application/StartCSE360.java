@@ -30,19 +30,17 @@ public class StartCSE360 extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-<<<<<<< HEAD
 			databaseHelper.connectToDatabase(); 	// Connect to the database
 			answerManager.fetchAnswers(); 			// Populate answers from database
 			questionManager.fetchQuestions(); 		// Populate questions from database
 			commentManager.fetchComments(); 		// Populate comments from database
 			reviewManager.fetchReviews();           // Populate reviews from database
-=======
+			
 			databaseHelper.connectToDatabase(); // Connect to the database
 			answerManager.fetchAnswers(); // Populate answers from database
 			questionManager.fetchQuestions(); // Populate questions from database
 			commentManager.fetchComments(); // Populate comments from database
 			reviewManager.fetchReviews(); // Populate reviews from database
->>>>>>> 0f1c5bdb444abcbee9df05e49b995a4cd3d5a86c
 
 			if (databaseHelper.isDatabaseEmpty()) {
 				new FirstPage(databaseHelper).show(primaryStage);
