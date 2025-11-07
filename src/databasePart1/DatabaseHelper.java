@@ -116,13 +116,17 @@ public class DatabaseHelper {
 		statement.execute(messagesTable);
 	}
 
-	public boolean isDatabaseEmpty() throws SQLException {
-		String query = "SELECT * FROM cse360users";
-		ResultSet resultSet = statement.executeQuery(query);
-		if (resultSet.first())
-			return true;
-		else
-			return false;
+	public boolean isDatabaseEmpty() {
+	    String query = "SELECT COUNT(*) FROM cse360users";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query);
+	         ResultSet rs = pstmt.executeQuery()) {
+	        if (rs.next()) {
+	            return rs.getInt(1) == 0; // true if no users
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return false;
 	}
 
 	public Statement getStatement() {
