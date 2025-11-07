@@ -44,3 +44,6 @@ target/
 *.log
 .DS_Store
 
+# vscode files
+.vscode/
+*.code-workspace
