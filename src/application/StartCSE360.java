@@ -8,6 +8,9 @@ import databasePart1.DatabaseHelper;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+/**
+ * A program that simulates a simple question-and-answer system.
+ */
 public class StartCSE360 extends Application {
 
 	private static final DatabaseHelper databaseHelper = new DatabaseHelper();
@@ -17,8 +20,7 @@ public class StartCSE360 extends Application {
 	private static final ReviewManager reviewManager = new ReviewManager(databaseHelper);
 	private static final ReviewerProfileManager reviewProfileManager = new ReviewerProfileManager(databaseHelper);
 	private static final MessageManager messageManager = new MessageManager(databaseHelper);
-	
-	
+
 	private static User currentUser = null;
 
 	public static void main(String[] args) {
@@ -28,11 +30,19 @@ public class StartCSE360 extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
+<<<<<<< HEAD
 			databaseHelper.connectToDatabase(); 	// Connect to the database
 			answerManager.fetchAnswers(); 			// Populate answers from database
 			questionManager.fetchQuestions(); 		// Populate questions from database
 			commentManager.fetchComments(); 		// Populate comments from database
-			//reviewManager.fetchReviews();           // Populate reviews from database
+			reviewManager.fetchReviews();           // Populate reviews from database
+=======
+			databaseHelper.connectToDatabase(); // Connect to the database
+			answerManager.fetchAnswers(); // Populate answers from database
+			questionManager.fetchQuestions(); // Populate questions from database
+			commentManager.fetchComments(); // Populate comments from database
+			reviewManager.fetchReviews(); // Populate reviews from database
+>>>>>>> 0f1c5bdb444abcbee9df05e49b995a4cd3d5a86c
 
 			if (databaseHelper.isDatabaseEmpty()) {
 				new FirstPage(databaseHelper).show(primaryStage);
@@ -59,25 +69,25 @@ public class StartCSE360 extends Application {
 	public static CommentManager getCommentManager() {
 		return commentManager;
 	}
-	public static void setCurrentUser(User user)
-	{
+
+	public static void setCurrentUser(User user) {
 		currentUser = user;
 	}
-	public static User getCurrentUser()
-	{
+
+	public static User getCurrentUser() {
 		return currentUser;
 	}
-	public static ReviewManager getReviewManager() 
-	{
-    	return reviewManager;
+
+	public static ReviewManager getReviewManager() {
+		return reviewManager;
 	}
-	
+
 	public static ReviewerProfileManager getReviewerProfileManager() {
-	    return reviewProfileManager;
+		return reviewProfileManager;
 	}
-	
+
 	public static MessageManager getMessageManager() {
-        return messageManager;
-    }
+		return messageManager;
+	}
 
 }
