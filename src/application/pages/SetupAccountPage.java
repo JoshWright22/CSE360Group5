@@ -123,8 +123,8 @@ public class SetupAccountPage {
 				if (databaseHelper.validateInvitationCode(code)) {
 
 					// Create a new user and register them in the database
-					User user = this.databaseHelper.createUser(userName, password, firstName, lastName,
-							email, UserRole.STUDENT);
+					User user = this.databaseHelper.createUser(userName, password, firstName, lastName, email,
+							UserRole.STUDENT);
 					StartCSE360.setCurrentUser(user);
 
 					// Navigate user to welcome page
@@ -134,17 +134,17 @@ public class SetupAccountPage {
 			} else
 				errorLabel.setText("Unfortunately, that username is taken.");
 		});
-		
+
 		Button backButton = new Button("Back");
-		
+
 		backButton.setOnAction(a -> {
 			new SetupLoginSelectionPage(this.databaseHelper).show(primaryStage);
 		});
 
 		VBox layout = new VBox(10);
 		layout.setStyle("-fx-padding: 20; -fx-alignment: center;");
-		layout.getChildren().addAll(userNameField, passwordField, firstNameField, lastNameField, emailField,
-				inviteCodeField, setupButton, errorLabel);
+		layout.getChildren().addAll(userNameField, passwordField, firstNameField, lastNameField, emailField, inviteCodeField,
+				setupButton, errorLabel);
 
 		primaryStage.setScene(new Scene(layout, 800, 400));
 		primaryStage.setTitle("Account Setup");

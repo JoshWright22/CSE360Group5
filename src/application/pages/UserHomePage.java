@@ -32,8 +32,7 @@ public class UserHomePage {
 
 		User currentUser = StartCSE360.getCurrentUser();
 
-		Label userLabel = (currentUser != null)
-				? new Label("Hello, " + currentUser.getUserName() + "!")
+		Label userLabel = (currentUser != null) ? new Label("Hello, " + currentUser.getUserName() + "!")
 				: new Label("Hello, Anonymous!");
 		userLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
@@ -102,17 +101,15 @@ public class UserHomePage {
 		TextArea bodyTextArea = new TextArea();
 		Button postButton = new Button("Post question");
 		postButton.setOnAction(e -> {
-			Question question = StartCSE360.getQuestionManager()
-					.createNewQuestion(currentUser.getUserName(), LocalDateTime.now(),
-							titleTextArea.getText(), bodyTextArea.getText(), new ArrayList<>());
+			Question question = StartCSE360.getQuestionManager().createNewQuestion(currentUser.getUserName(),
+					LocalDateTime.now(), titleTextArea.getText(), bodyTextArea.getText(), new ArrayList<>());
 			addQuestionLabel(questionsBox, question, primaryStage);
 		});
 		postBox.getChildren().addAll(titleLabel, titleTextArea, bodyLabel, bodyTextArea, postButton);
 
 		VBox layout = new VBox(15);
 		layout.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-		layout.getChildren().addAll(userLabel, reviewerButtons, searchBox, questionsScrollPane, new Separator(),
-				postBox);
+		layout.getChildren().addAll(userLabel, reviewerButtons, searchBox, questionsScrollPane, new Separator(), postBox);
 
 		Scene userScene = new Scene(layout, 800, 400);
 		primaryStage.setScene(userScene);
