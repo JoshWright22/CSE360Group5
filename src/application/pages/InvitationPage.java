@@ -32,13 +32,13 @@ public class InvitationPage {
 
 		// Button to generate the invitation code
 		Button showCodeButton = new Button("Generate Invitation Code");
-		
+
 		// Button to return to home page
 		Button backButton = new Button("Go back");
 
 		// Label to display the generated invitation code
 		Label inviteCodeLabel = new Label("One-time invitation code:");
-		
+
 		inviteCodeLabel.setStyle("-fx-font-size: 14px; -fx-font-style: italic;");
 
 		showCodeButton.setOnAction(a -> {
@@ -46,7 +46,7 @@ public class InvitationPage {
 			String invitationCode = databaseHelper.generateInvitationCode();
 			inviteCodeLabel.setText(invitationCode);
 		});
-		
+
 		backButton.setOnAction(a -> {
 			new WelcomeLoginPage(databaseHelper).show(primaryStage, user);
 		});
