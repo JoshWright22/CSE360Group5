@@ -17,13 +17,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.collections.FXCollections;
-/**
- * AdminPage class represents the user interface for the admin user. This page
- * displays a simple welcome message for the admin.
- */
 
+/**
+ * The AdminPage class represents the user interface for the admin user. This
+ * page displays a simple welcome message for the admin.
+ */
 public class AdminHomePage {
+
 	private Button updateButton = new Button("Update Roles");
+
 	/**
 	 * Displays the admin page in the provided primary stage.
 	 * 
@@ -38,10 +40,10 @@ public class AdminHomePage {
 		Label adminLabel = new Label("Hello, Admin!");
 
 		adminLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-		
+
 		TableView<User> userTable = new TableView<>();
 		setupUserTable(userTable);
-		
+
 		updateButton.setVisible(false);
 		updateButton.setOnAction(e -> {
 			updateDatabaseRoles(userTable);
@@ -54,71 +56,77 @@ public class AdminHomePage {
 		primaryStage.setTitle("Admin Page");
 	}
 
+	/**
+	 * Given a {@link TableView} with {@link User} as its generic object, this
+	 * method sets up the TableView to show all users and their details.
+	 * 
+	 * @param userTable TableView to create/populate
+	 */
 	private void setupUserTable(TableView<User> userTable) {
-		//Create User column
+		// Create User column
 		TableColumn<User, String> usernameCol = new TableColumn<>("Username");
 		usernameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUserName()));
 
-		//Create Role column
+		// Create Role column
 		TableColumn<User, UserRole> roleCol = new TableColumn<>("Role");
 		roleCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getRole()));
 		roleCol.setCellFactory(ComboBoxTableCell.forTableColumn(FXCollections.observableArrayList(UserRole.values())));
 		roleCol.setOnEditCommit(event -> {
-	    User user = event.getRowValue();
-	    UserRole newRole = event.getNewValue();
-	    	user.setRole(newRole);
-	    	System.out.println("Updated role for " + user.getUserName() + " to " + newRole);
+			User user = event.getRowValue();
+			UserRole newRole = event.getNewValue();
+			user.setRole(newRole);
+			System.out.println("Updated role for " + user.getUserName() + " to " + newRole);
 		});
-		
-		//Update Role styling and behavior
+
+		// Update Role styling and behavior
 		roleCol.setCellFactory(column -> new TableCell<User, UserRole>() {
 			private final ComboBox<UserRole> comboBox = new ComboBox<>(FXCollections.observableArrayList(UserRole.values()));
 			{
 				comboBox.setOnAction(event -> {
-				    User user = getTableRow().getItem();
-				    if (user != null) {
-				        UserRole oldRole = user.getRole();
-				        UserRole newRole = comboBox.getValue();
+					User user = getTableRow().getItem();
+					if (user != null) {
+						UserRole oldRole = user.getRole();
+						UserRole newRole = comboBox.getValue();
 
-				        // If the role actually changed
-		                if (newRole != null && !newRole.equals(oldRole)) {
-		                    user.setRole(newRole);
-		                    updateButton.setVisible(true);
+						// If the role actually changed
+						if (newRole != null && !newRole.equals(oldRole)) {
+							user.setRole(newRole);
+							updateButton.setVisible(true);
 
-		                    comboBox.setStyle("-fx-background-color: lightyellow;");
-		                } else {
-		                    comboBox.setStyle("");
-		                }
-				    }
+							comboBox.setStyle("-fx-background-color: lightyellow;");
+						} else {
+							comboBox.setStyle("");
+						}
+					}
 				});
-		    }
+			}
 
-		    @Override
-		    protected void updateItem(UserRole item, boolean empty) {
-		        super.updateItem(item, empty);
+			@Override
+			protected void updateItem(UserRole item, boolean empty) {
+				super.updateItem(item, empty);
 
-		        if (empty) {
-		            setGraphic(null);
-		        } else {
-		            comboBox.setValue(item);
-		            setGraphic(comboBox);
-		        }
-		    }
+				if (empty) {
+					setGraphic(null);
+				} else {
+					comboBox.setValue(item);
+					setGraphic(comboBox);
+				}
+			}
 		});
 
 		userTable.getColumns().addAll(usernameCol, roleCol);
 		userTable.setEditable(true);
-    
-    	//Fetch Users from database and add them to table
-    	String query = "SELECT * FROM cse360users";
+
+		// Fetch Users from database and add them to table
+		String query = "SELECT * FROM cse360users";
 		try (ResultSet rs = StartCSE360.getDatabaseHelper().getStatement().executeQuery(query)) {
 			while (rs.next()) {
 				String userName = rs.getString("userName");
 				String password = rs.getString("password");
 				UserRole role = UserRole.valueOf(rs.getString("role").toUpperCase());
-			
+
 				User userToAdd = new User(userName, password, role);
-			
+
 				userTable.getItems().add(userToAdd);
 			}
 		} catch (SQLException e) {
@@ -127,16 +135,22 @@ public class AdminHomePage {
 		}
 	}
 
-	private void updateDatabaseRoles(TableView<User> userTable){
+	/**
+	 * Given a {@link TableView} with {@link User} as its generic object, this
+	 * pushes the selected roles for the users in the TableView to the local H2
+	 * database.
+	 * 
+	 * @param userTable TableView to update
+	 */
+	private void updateDatabaseRoles(TableView<User> userTable) {
 		for (User user : userTable.getItems()) {
-		    if (!user.getRole().equals(StartCSE360.getDatabaseHelper().getUserRole(user.getUserName()))) {
-		        StartCSE360.getDatabaseHelper().updateUserRole(user.getUserName(), user.getRole());
-		    }
+			if (!user.getRole().equals(StartCSE360.getDatabaseHelper().getUserRole(user.getUserName()))) {
+				StartCSE360.getDatabaseHelper().updateUserRole(user.getUserName(), user.getRole());
+			}
 		}
-		
-		 userTable.refresh();
-		 updateButton.setVisible(false);
+
+		userTable.refresh();
+		updateButton.setVisible(false);
 	}
-	
-	
+
 }
