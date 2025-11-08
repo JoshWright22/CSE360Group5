@@ -36,19 +36,19 @@ public class WelcomeLoginPage {
 			UserRole role = user.getRole();
 			System.out.println(role);
 
-			switch (role) {
-			case ADMIN:
-				new AdminHomePage().show(primaryStage);
-				break;
-			case STUDENT:
-			case REVIEWER: // reviewers go to the same home page but get extra navigation
-				new UserHomePage().show(primaryStage);
-				break;
-			default:
-				new UserHomePage().show(primaryStage);
-				break;
-			}
-		});
+            switch (role) {
+                case ADMIN:
+                    new AdminHomePage().show(primaryStage);
+                    break;
+                case STUDENT:
+                case REVIEWER: // reviewers go to the same home page but get extra navigation
+                    new UserHomePage().show(primaryStage);
+                    break;
+                case INSTRUCTOR:
+                	new InstructorHomePage().show(primaryStage);
+                default:
+                    new UserHomePage().show(primaryStage);
+                    break;
 
 		// Button to quit the application
 		Button quitButton = new Button("Quit");
