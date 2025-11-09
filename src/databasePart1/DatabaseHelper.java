@@ -88,10 +88,11 @@ public class DatabaseHelper {
 		String reviewsTable = "CREATE TABLE IF NOT EXISTS Reviews ("
 				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
 				+ "userName VARCHAR(255), "
-				+ "productId INT, "
+				+ "creationDate VARCHAR(255), "
+				+ "content TEXT, "
 				+ "rating INT, "
-				+ "comment TEXT, "
-				+ "creationDate VARCHAR(255))";
+				+ "questionId INT NULL, "
+				+ "answerId INT NULL)";
 		statement.execute(reviewsTable);
 
 		// Create the ReviewerProfiles table

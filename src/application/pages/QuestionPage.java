@@ -1,6 +1,7 @@
 package application.pages;
 
 import application.StartCSE360;
+import application.UserRole;
 import application.obj.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import javafx.geometry.*;
+import javafx.geometry.Pos;
+import javafx.geometry.Orientation;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /*
  * QuestionPage represents the user interface for a given question
@@ -62,8 +66,8 @@ public class QuestionPage {
 
 		VBox layout = new VBox();
 		layout.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-		layout.getChildren().addAll(removeBox, titleBox, bodyBox, headerBox, new Separator(), answersScrollPane, answerTextArea,
-				postButton);
+		layout.getChildren().addAll(removeBox, titleBox, bodyBox, headerBox, new Separator(), answersScrollPane,
+				answerTextArea, postButton);
 
 		primaryStage.setScene(new Scene(layout, 800, 400));
 		primaryStage.setTitle("User Login");
@@ -71,12 +75,17 @@ public class QuestionPage {
 	}
 
 	private void addAnswerLabel(VBox answerBox, Answer answer) {
+		VBox answerContainer = new VBox(10);
+		answerContainer.setStyle("-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 5;");
+
+		// Answer content and metadata
 		HBox box = new HBox();
 		Label answerLabel = new Label(answer.getContent());
 		Label authorLabel = new Label(answer.getUserName());
 		Label dateLabel = new Label(answer.getCreationDate().format(FORMATTER));
 
 		answerLabel.setWrapText(true);
+		answerLabel.setStyle("-fx-font-size: 14px;");
 
 		Separator separator1 = new Separator();
 		separator1.setOrientation(Orientation.VERTICAL);
@@ -85,7 +94,143 @@ public class QuestionPage {
 
 		box.getChildren().addAll(answerLabel, separator1, authorLabel, separator2, dateLabel);
 
-		answerBox.getChildren().addAll(box);
+		// Reviews section
+		VBox reviewsBox = new VBox(5);
+		reviewsBox.setStyle("-fx-padding: 10 0 0 20;");
+
+		// Get reviews for this answer
+		var reviews = StartCSE360.getReviewManager().getReviewsForAnswer(answer.getId());
+		if (!reviews.isEmpty()) {
+			Label reviewsLabel = new Label("Reviews:");
+			reviewsLabel.setStyle("-fx-font-weight: bold;");
+			reviewsBox.getChildren().add(reviewsLabel);
+
+			for (Review review : reviews) {
+				HBox reviewBox = new HBox(10);
+				reviewBox.setStyle("-fx-padding: 5;");
+
+				// Show rating as stars
+				Label ratingLabel = new Label("★".repeat(review.getRating()) + "☆".repeat(5 - review.getRating()));
+				ratingLabel.setStyle("-fx-text-fill: #FFD700;");
+
+				Label reviewContent = new Label(review.getContent());
+				reviewContent.setWrapText(true);
+
+				Label reviewAuthor = new Label("- " + review.getUserName());
+				reviewAuthor.setStyle("-fx-font-style: italic;");
+
+				reviewBox.getChildren().addAll(ratingLabel, reviewContent, reviewAuthor);
+				reviewsBox.getChildren().add(reviewBox);
+			}
+		}
+
+		// Always add reviews section
+		Label reviewsLabel = new Label("Reviews:");
+		reviewsLabel.setStyle("-fx-font-weight: bold;");
+		reviewsBox.getChildren().add(reviewsLabel);
+
+		var existingReviews = StartCSE360.getReviewManager().getReviewsForAnswer(answer.getId());
+		if (!existingReviews.isEmpty()) {
+			for (Review r : existingReviews) {
+				HBox reviewBox = new HBox(10);
+				reviewBox.setStyle("-fx-padding: 5;");
+
+				Label ratingLabel = new Label("★".repeat(r.getRating()) + "☆".repeat(5 - r.getRating()));
+				ratingLabel.setStyle("-fx-text-fill: #FFD700;");
+
+				Label reviewContentLabel = new Label(r.getContent());
+				reviewContentLabel.setWrapText(true);
+
+				Label reviewAuthorLabel = new Label("- " + r.getUserName());
+				reviewAuthorLabel.setStyle("-fx-font-style: italic;");
+
+				reviewBox.getChildren().addAll(ratingLabel, reviewContentLabel, reviewAuthorLabel);
+				reviewsBox.getChildren().add(reviewBox);
+			}
+		} else {
+			Label noReviewsLabel = new Label("No reviews yet");
+			noReviewsLabel.setStyle("-fx-text-fill: #666666; -fx-font-style: italic;");
+			reviewsBox.getChildren().add(noReviewsLabel);
+		}
+
+		// Add review button (only show for reviewers)
+		if (StartCSE360.getCurrentUser().getRole() == UserRole.REVIEWER) {
+			HBox addReviewBox = new HBox(10);
+			addReviewBox.setStyle("-fx-padding: 10 0 0 0;");
+
+			TextArea reviewContent = new TextArea();
+			reviewContent.setPromptText("Write your review...");
+			reviewContent.setPrefRowCount(2);
+			reviewContent.setWrapText(true);
+
+			ComboBox<Integer> ratingCombo = new ComboBox<>();
+			ratingCombo.getItems().addAll(1, 2, 3, 4, 5);
+			ratingCombo.setPromptText("Rating");
+
+			Button submitReview = new Button("Add Review");
+			submitReview.setOnAction(e -> {
+				if (reviewContent.getText().trim().isEmpty() || ratingCombo.getValue() == null) {
+					showAlert("Error", "Please provide both a review and rating");
+					return;
+				}
+
+				Review review = StartCSE360.getReviewManager().createNewAnswerReview(
+						StartCSE360.getCurrentUser().getUserName(),
+						LocalDateTime.now(),
+						reviewContent.getText().trim(),
+						ratingCombo.getValue(),
+						answer);
+
+				if (review == null) {
+					showAlert("Error", "Failed to create review. Please try again.");
+					return;
+				}
+
+				// Refresh the reviews section
+				reviewsBox.getChildren().clear();
+				Label newReviewsLabel = new Label("Reviews:");
+				newReviewsLabel.setStyle("-fx-font-weight: bold;");
+				reviewsBox.getChildren().add(newReviewsLabel);
+
+				var updatedReviews = StartCSE360.getReviewManager().getReviewsForAnswer(answer.getId());
+				if (!updatedReviews.isEmpty()) {
+					for (Review r : updatedReviews) {
+						HBox newReviewBox = new HBox(10);
+						newReviewBox.setStyle("-fx-padding: 5;");
+
+						Label ratingLabel = new Label("★".repeat(r.getRating()) + "☆".repeat(5 - r.getRating()));
+						ratingLabel.setStyle("-fx-text-fill: #FFD700;");
+
+						Label reviewContentLabel = new Label(r.getContent());
+						reviewContentLabel.setWrapText(true);
+
+						Label reviewAuthorLabel = new Label("- " + r.getUserName());
+						reviewAuthorLabel.setStyle("-fx-font-style: italic;");
+
+						newReviewBox.getChildren().addAll(ratingLabel, reviewContentLabel, reviewAuthorLabel);
+						reviewsBox.getChildren().add(newReviewBox);
+					}
+				}
+
+				// Clear input fields
+				reviewContent.clear();
+				ratingCombo.setValue(null);
+			});
+
+			addReviewBox.getChildren().addAll(reviewContent, ratingCombo, submitReview);
+			reviewsBox.getChildren().add(addReviewBox);
+		}
+
+		answerContainer.getChildren().addAll(box, reviewsBox);
+		answerBox.getChildren().add(answerContainer);
+	}
+
+	private void showAlert(String title, String message) {
+		Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		alert.showAndWait();
 	}
 
 	private void populateAnswerBox(VBox answerBox, Question question, List<Answer> answers) {
@@ -95,7 +240,8 @@ public class QuestionPage {
 		}
 	}
 
-	private HBox createRemoveBox(Stage primaryStage, UserHomePage userHomePage, Question question, List<Answer> answers) {
+	private HBox createRemoveBox(Stage primaryStage, UserHomePage userHomePage, Question question,
+			List<Answer> answers) {
 		HBox removeBox = new HBox(6);
 		Button backButton = new Button("<-");
 		backButton.setOnMouseClicked(e -> {
@@ -115,7 +261,8 @@ public class QuestionPage {
 		return removeBox;
 	}
 
-	private HBox createTitleBox(Stage primaryStage, UserHomePage userHomePage, Question question, List<Answer> answers) {
+	private HBox createTitleBox(Stage primaryStage, UserHomePage userHomePage, Question question,
+			List<Answer> answers) {
 		HBox titleBox = new HBox(6);
 		titleBox.setAlignment(Pos.TOP_CENTER);
 		Label titleLabel = new Label(question.getTitle());
@@ -124,7 +271,8 @@ public class QuestionPage {
 		return titleBox;
 	}
 
-	private HBox createHeaderBox(Stage primaryStage, UserHomePage userHomePage, Question question, List<Answer> answers) {
+	private HBox createHeaderBox(Stage primaryStage, UserHomePage userHomePage, Question question,
+			List<Answer> answers) {
 		HBox headerBox = new HBox(6);
 		headerBox.setAlignment(Pos.TOP_RIGHT);
 		headerBox.setPrefWidth(Double.MAX_VALUE);

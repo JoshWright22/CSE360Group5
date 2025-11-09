@@ -31,8 +31,19 @@ public class ReviewManager {
 	 * Attempts to fetch all data from the Reviews table.
 	 */
 	public void fetchReviews() {
+		// Ensure database connection is available
+		if (this.database.getConnection() == null) {
+			try {
+				this.database.connectToDatabase();
+			} catch (SQLException e) {
+				System.err.println("Failed to connect to database when fetching reviews: " + e.getMessage());
+				return;
+			}
+		}
+
 		String query = "SELECT * FROM Reviews";
-		try (ResultSet rs = this.database.getStatement().executeQuery(query)) {
+		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query);
+			ResultSet rs = stmt.executeQuery()) {
 			
 			reviewSet.clear();
 			
@@ -44,19 +55,32 @@ public class ReviewManager {
 				int rating = rs.getInt("rating");
 				Integer questionId = rs.getObject("questionId", Integer.class);
 				Integer answerId = rs.getObject("answerId", Integer.class);
-				Review r;
-				if (questionId != null) {
-					Question q = StartCSE360.getQuestionManager().fetchQuestion(questionId);
-					r = new Review(id, userName, creationDate, content, rating, q);
-				} else {
-					Answer a = StartCSE360.getAnswerManager().fetchAnswer(answerId);
-					r = new Review(id, userName, creationDate, content, rating, a);
+				Review r = null;
+
+				try {
+					if (questionId != null) {
+						Question q = StartCSE360.getQuestionManager().fetchQuestion(questionId);
+						if (q != null) {
+							r = new Review(id, userName, creationDate, content, rating, q);
+						}
+					} else if (answerId != null) {
+						Answer a = StartCSE360.getAnswerManager().fetchAnswer(answerId);
+						if (a != null) {
+							r = new Review(id, userName, creationDate, content, rating, a);
+						}
+					}
+					
+					if (r != null) {
+						this.reviewSet.add(r);
+					} else {
+						System.err.println("Failed to create review with ID " + id + ": associated question/answer not found");
+					}
+				} catch (Exception e) {
+					System.err.println("Error processing review with ID " + id + ": " + e.getMessage());
 				}
-				
-				this.reviewSet.add(r);
 			}
 		} catch (SQLException e) {
-			System.err.println("Failed to get all reviews from the database.");
+			System.err.println("Failed to get all reviews from the database: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -154,8 +178,17 @@ public class ReviewManager {
 	 * @param question Question being reviewed
 	 * @return new Review object
 	 */
-  
 	public Review createNewQuestionReview(String userName, LocalDateTime creationDate, String content, int rating, Question question) {
+		// Check if database is connected, if not try to reconnect
+		if (this.database.getConnection() == null) {
+			try {
+				this.database.connectToDatabase();
+			} catch (SQLException e) {
+				System.err.println("Failed to connect to database: " + e.getMessage());
+				return null;
+			}
+		}
+
 		String query = "INSERT INTO Reviews (userName, creationDate, content, rating, questionId, answerId) VALUES (?, ?, ?, ?, ?, NULL)";
 		int id = -1;
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -166,18 +199,23 @@ public class ReviewManager {
 			stmt.setInt(5, question.getId());
 			stmt.executeUpdate();
 			ResultSet results = stmt.getGeneratedKeys();
-			if (results.next())
+			if (results.next()) {
 				id = results.getInt(1);
+			} else {
+				System.err.println("Failed to get generated ID for new review");
+				return null;
+			}
 		} catch (SQLException e) {
-			System.err.println("Failed to create a new question review.");
+			System.err.println("Failed to create a new question review: " + e.getMessage());
 			e.printStackTrace();
+			return null;
 		}
 
 		Review r = new Review(id, userName, creationDate, content, rating, question);
 		this.reviewSet.add(r);
 		return r;
 	}
-	
+  
 	/**
 	 * Creates a new Review for an Answer before inserting it into the Reviews table and local cache.
 	 * 
@@ -188,8 +226,17 @@ public class ReviewManager {
 	 * @param answer Answer being reviewed
 	 * @return new Review object
 	 */
-  
 	public Review createNewAnswerReview(String userName, LocalDateTime creationDate, String content, int rating, Answer answer) {
+		// Check if database is connected, if not try to reconnect
+		if (this.database.getConnection() == null) {
+			try {
+				this.database.connectToDatabase();
+			} catch (SQLException e) {
+				System.err.println("Failed to connect to database: " + e.getMessage());
+				return null;
+			}
+		}
+
 		String query = "INSERT INTO Reviews (userName, creationDate, content, rating, questionId, answerId) VALUES (?, ?, ?, ?, NULL, ?)";
 		int id = -1;
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -200,11 +247,16 @@ public class ReviewManager {
 			stmt.setInt(5, answer.getId());
 			stmt.executeUpdate();
 			ResultSet results = stmt.getGeneratedKeys();
-			if (results.next())
+			if (results.next()) {
 				id = results.getInt(1);
+			} else {
+				System.err.println("Failed to get generated ID for new review");
+				return null;
+			}
 		} catch (SQLException e) {
-			System.err.println("Failed to create a new answer review.");
+			System.err.println("Failed to create a new answer review: " + e.getMessage());
 			e.printStackTrace();
+			return null;
 		}
 
 		Review r = new Review(id, userName, creationDate, content, rating, answer);
