@@ -118,16 +118,16 @@ public class DatabaseHelper {
 	}
 
 	public boolean isDatabaseEmpty() {
-	    String query = "SELECT COUNT(*) FROM cse360users";
-	    try (PreparedStatement pstmt = connection.prepareStatement(query);
-	         ResultSet rs = pstmt.executeQuery()) {
-	        if (rs.next()) {
-	            return rs.getInt(1) == 0; // true if no users
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return false;
+		String query = "SELECT COUNT(*) FROM cse360users";
+		try (PreparedStatement pstmt = connection.prepareStatement(query);
+				ResultSet rs = pstmt.executeQuery()) {
+			if (rs.next()) {
+				return rs.getInt(1) == 0; // true if no users
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	public Statement getStatement() {

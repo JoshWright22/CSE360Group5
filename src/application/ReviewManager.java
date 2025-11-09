@@ -16,17 +16,19 @@ import application.obj.Review;
 import databasePart1.DatabaseHelper;
 
 /**
- * Acts as a manager class for dealing with Review objects. This use of data hiding and encapsulation helps ensure parity
+ * Acts as a manager class for dealing with Review objects. This use of data
+ * hiding and encapsulation helps ensure parity
  * between data stored in the local cache and data stored on the MySQL database.
  */
 public class ReviewManager {
 
 	private final DatabaseHelper database;
 	private final Set<Review> reviewSet = new HashSet<>();
+
 	public ReviewManager(DatabaseHelper database) {
 		this.database = database;
 	}
-	
+
 	/**
 	 * Attempts to fetch all data from the Reviews table.
 	 */
@@ -43,10 +45,10 @@ public class ReviewManager {
 
 		String query = "SELECT * FROM Reviews";
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query);
-			ResultSet rs = stmt.executeQuery()) {
-			
+				ResultSet rs = stmt.executeQuery()) {
+
 			reviewSet.clear();
-			
+
 			while (rs.next()) {
 				int id = rs.getInt("id");
 				String userName = rs.getString("userName");
@@ -69,11 +71,12 @@ public class ReviewManager {
 							r = new Review(id, userName, creationDate, content, rating, a);
 						}
 					}
-					
+
 					if (r != null) {
 						this.reviewSet.add(r);
 					} else {
-						System.err.println("Failed to create review with ID " + id + ": associated question/answer not found");
+						System.err.println(
+								"Failed to create review with ID " + id + ": associated question/answer not found");
 					}
 				} catch (Exception e) {
 					System.err.println("Error processing review with ID " + id + ": " + e.getMessage());
@@ -84,7 +87,7 @@ public class ReviewManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Fetches a particular review from the database given the review's ID.
 	 * 
@@ -93,7 +96,7 @@ public class ReviewManager {
 	 */
 	public Review fetchReview(int id) {
 		Review result = null;
-		
+
 		String query = "SELECT * FROM Reviews WHERE id = ?";
 		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query)) {
 			stmt.setInt(1, id);
@@ -106,7 +109,7 @@ public class ReviewManager {
 				int rating = rs.getInt("rating");
 				Integer questionId = rs.getObject("questionId", Integer.class);
 				Integer answerId = rs.getObject("answerId", Integer.class);
-				
+
 				if (questionId != null) {
 					Question q = StartCSE360.getQuestionManager().fetchQuestion(questionId);
 					result = new Review(i, userName, creationTime, content, rating, q);
@@ -119,19 +122,20 @@ public class ReviewManager {
 			System.err.println("Failed to fetch review from database.");
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
-	 * Gets an unmodifiable reference to the set of reviews stored in the local cache.
+	 * Gets an unmodifiable reference to the set of reviews stored in the local
+	 * cache.
 	 * 
 	 * @return Unmodifiable set containing local reviews
 	 */
 	public Set<Review> getReviewSet() {
 		return Collections.unmodifiableSet(this.reviewSet);
 	}
-	
+
 	/**
 	 * Gets all reviews written by a specific reviewer.
 	 * 
@@ -143,7 +147,7 @@ public class ReviewManager {
 				.filter(r -> r.getUserName().equals(userName))
 				.collect(Collectors.toSet());
 	}
-	
+
 	/**
 	 * Gets all reviews for a specific question.
 	 * 
@@ -155,7 +159,7 @@ public class ReviewManager {
 				.filter(r -> r.isQuestionReview() && r.getReviewedQuestion().getId() == questionId)
 				.collect(Collectors.toSet());
 	}
-	
+
 	/**
 	 * Gets all reviews for a specific answer.
 	 * 
@@ -167,18 +171,20 @@ public class ReviewManager {
 				.filter(r -> r.isAnswerReview() && r.getReviewedAnswer().getId() == answerId)
 				.collect(Collectors.toSet());
 	}
-	
+
 	/**
-	 * Creates a new Review for a Question before inserting it into the Reviews table and local cache.
+	 * Creates a new Review for a Question before inserting it into the Reviews
+	 * table and local cache.
 	 * 
-	 * @param userName Name of reviewer
+	 * @param userName     Name of reviewer
 	 * @param creationDate When the review was created
-	 * @param content Review content
-	 * @param rating Rating value (1-5)
-	 * @param question Question being reviewed
+	 * @param content      Review content
+	 * @param rating       Rating value (1-5)
+	 * @param question     Question being reviewed
 	 * @return new Review object
 	 */
-	public Review createNewQuestionReview(String userName, LocalDateTime creationDate, String content, int rating, Question question) {
+	public Review createNewQuestionReview(String userName, LocalDateTime creationDate, String content, int rating,
+			Question question) {
 		// Check if database is connected, if not try to reconnect
 		if (this.database.getConnection() == null) {
 			try {
@@ -191,7 +197,8 @@ public class ReviewManager {
 
 		String query = "INSERT INTO Reviews (userName, creationDate, content, rating, questionId, answerId) VALUES (?, ?, ?, ?, ?, NULL)";
 		int id = -1;
-		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query,
+				Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setString(1, userName);
 			stmt.setString(2, creationDate.toString());
 			stmt.setString(3, content);
@@ -215,18 +222,20 @@ public class ReviewManager {
 		this.reviewSet.add(r);
 		return r;
 	}
-  
+
 	/**
-	 * Creates a new Review for an Answer before inserting it into the Reviews table and local cache.
+	 * Creates a new Review for an Answer before inserting it into the Reviews table
+	 * and local cache.
 	 * 
-	 * @param userName Name of reviewer
+	 * @param userName     Name of reviewer
 	 * @param creationDate When the review was created
-	 * @param content Review content
-	 * @param rating Rating value (1-5)
-	 * @param answer Answer being reviewed
+	 * @param content      Review content
+	 * @param rating       Rating value (1-5)
+	 * @param answer       Answer being reviewed
 	 * @return new Review object
 	 */
-	public Review createNewAnswerReview(String userName, LocalDateTime creationDate, String content, int rating, Answer answer) {
+	public Review createNewAnswerReview(String userName, LocalDateTime creationDate, String content, int rating,
+			Answer answer) {
 		// Check if database is connected, if not try to reconnect
 		if (this.database.getConnection() == null) {
 			try {
@@ -239,7 +248,8 @@ public class ReviewManager {
 
 		String query = "INSERT INTO Reviews (userName, creationDate, content, rating, questionId, answerId) VALUES (?, ?, ?, ?, NULL, ?)";
 		int id = -1;
-		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement stmt = this.database.getConnection().prepareStatement(query,
+				Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setString(1, userName);
 			stmt.setString(2, creationDate.toString());
 			stmt.setString(3, content);
@@ -263,7 +273,7 @@ public class ReviewManager {
 		this.reviewSet.add(r);
 		return r;
 	}
-	
+
 	/**
 	 * Updates an existing review's content and rating in the database.
 	 * 
@@ -281,7 +291,7 @@ public class ReviewManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Deletes a review from the database and local cache.
 	 * 
