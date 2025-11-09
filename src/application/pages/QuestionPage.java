@@ -98,13 +98,14 @@ public class QuestionPage {
 		VBox reviewsBox = new VBox(5);
 		reviewsBox.setStyle("-fx-padding: 10 0 0 20;");
 
+		// Add reviews section header
+		Label reviewsLabel = new Label("Reviews:");
+		reviewsLabel.setStyle("-fx-font-weight: bold;");
+		reviewsBox.getChildren().add(reviewsLabel);
+
 		// Get reviews for this answer
 		var reviews = StartCSE360.getReviewManager().getReviewsForAnswer(answer.getId());
 		if (!reviews.isEmpty()) {
-			Label reviewsLabel = new Label("Reviews:");
-			reviewsLabel.setStyle("-fx-font-weight: bold;");
-			reviewsBox.getChildren().add(reviewsLabel);
-
 			for (Review review : reviews) {
 				HBox reviewBox = new HBox(10);
 				reviewBox.setStyle("-fx-padding: 5;");
@@ -120,31 +121,6 @@ public class QuestionPage {
 				reviewAuthor.setStyle("-fx-font-style: italic;");
 
 				reviewBox.getChildren().addAll(ratingLabel, reviewContent, reviewAuthor);
-				reviewsBox.getChildren().add(reviewBox);
-			}
-		}
-
-		// Always add reviews section
-		Label reviewsLabel = new Label("Reviews:");
-		reviewsLabel.setStyle("-fx-font-weight: bold;");
-		reviewsBox.getChildren().add(reviewsLabel);
-
-		var existingReviews = StartCSE360.getReviewManager().getReviewsForAnswer(answer.getId());
-		if (!existingReviews.isEmpty()) {
-			for (Review r : existingReviews) {
-				HBox reviewBox = new HBox(10);
-				reviewBox.setStyle("-fx-padding: 5;");
-
-				Label ratingLabel = new Label("★".repeat(r.getRating()) + "☆".repeat(5 - r.getRating()));
-				ratingLabel.setStyle("-fx-text-fill: #FFD700;");
-
-				Label reviewContentLabel = new Label(r.getContent());
-				reviewContentLabel.setWrapText(true);
-
-				Label reviewAuthorLabel = new Label("- " + r.getUserName());
-				reviewAuthorLabel.setStyle("-fx-font-style: italic;");
-
-				reviewBox.getChildren().addAll(ratingLabel, reviewContentLabel, reviewAuthorLabel);
 				reviewsBox.getChildren().add(reviewBox);
 			}
 		} else {
