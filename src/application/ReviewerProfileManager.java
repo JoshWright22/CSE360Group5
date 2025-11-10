@@ -19,6 +19,7 @@ public class ReviewerProfileManager {
     public ReviewerProfileManager(DatabaseHelper database) {
         this.database = database;
         createTableIfNotExists();
+        createPendingReviewersTableIfNotExists();
         fetchProfiles();
     }
 
@@ -44,6 +45,28 @@ public class ReviewerProfileManager {
             System.out.println("ReviewerProfiles table is ready.");
         } catch (SQLException e) {
             System.err.println("Failed to create ReviewerProfiles table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void createPendingReviewersTableIfNotExists() {
+        if (database.getConnection() == null) {
+            System.err.println("Database connection is null. Cannot create pending reviewers table.");
+            return;
+        }
+
+        String sql = """
+                    CREATE TABLE IF NOT EXISTS PendingReviewers (
+                        userName VARCHAR(255) PRIMARY KEY,
+                        requestDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """;
+
+        try (Statement stmt = database.getConnection().createStatement()) {
+            stmt.execute(sql);
+            System.out.println("PendingReviewers table is ready.");
+        } catch (SQLException e) {
+            System.err.println("Failed to create PendingReviewers table.");
             e.printStackTrace();
         }
     }
