@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import application.StartCSE360;
 import application.User;
+import application.UserRole;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -31,7 +32,7 @@ public class InstructorHomePage {
 		layout.setStyle("-fx-alignment: center; -fx-padding: 20;");
 
 		TableView<User> userTable = new TableView<>();
-		setupUserTable(userTable);
+		setupUserTable(userTable, primaryStage);
 
 		layout.getChildren().addAll(userTable);
 		Scene instructorScene = new Scene(layout, 800, 400);
@@ -41,101 +42,18 @@ public class InstructorHomePage {
 		primaryStage.setTitle("Instructor Page");
 	}
 	
-	private void setupUserTable(TableView<User> userTable) {
+	private void setupUserTable(TableView<User> userTable, Stage primaryStage) {
 		// Create user column
-		TableColumn<User, String> usernameCol = new TableColumn<>("Username");
-		usernameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUserName()));
+		TableColumn<User, String> usernameCol = createUsernameColumn();
 
 		// Create reviews column
-		TableColumn<User, Void> reviewsCol = new TableColumn<>("Reviews");
-		reviewsCol.setCellFactory(col -> new TableCell<User, Void>() {
-			private final Button reviewsBtn = new Button("Reviews");
-			
-			{
-				reviewsBtn.setStyle("-fx-background-color: #1E90FF; -fx-text-fill: white;");
-			}
-			
-			@Override
-			protected void updateItem(Void item, boolean empty) {
-			    super.updateItem(item, empty);
-			    if (empty) {
-			        setGraphic(null);
-			    } else {
-			        setGraphic(reviewsBtn);
-			    }
-			}
-		});
+		TableColumn<User, Void> reviewsCol = createReviewsColumn(primaryStage);
 		
-		// Create accept/reject column
-		TableColumn<User, Void> actionCol = new TableColumn<>("Actions");
-		actionCol.setCellFactory(col -> new TableCell<User, Void>() {
-		    private final Button acceptBtn = new Button("Accept");
-		    private final Button rejectBtn = new Button("Reject");
-		    private final HBox buttonBox = new HBox(10, acceptBtn, rejectBtn);
-
-		    {
-		        acceptBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
-		        rejectBtn.setStyle("-fx-background-color: #F44336; -fx-text-fill: white;");
-
-		        acceptBtn.setOnAction(event -> {
-		            User user = getTableView().getItems().get(getIndex());
-		            removeUserFromTable(user.getUserName(), userTable);
-		            System.out.println("Accepted: " + user.getUserName());
-		        });
-
-		        rejectBtn.setOnAction(event -> {
-		            User user = getTableView().getItems().get(getIndex());
-		            removeUserFromTable(user.getUserName(), userTable);
-		            System.out.println("Rejected: " + user.getUserName());
-		        });
-
-		        buttonBox.setAlignment(Pos.CENTER);
-		    }
-
-		    @Override
-		    protected void updateItem(Void item, boolean empty) {
-		        super.updateItem(item, empty);
-		        if (empty) {
-		            setGraphic(null);
-		        } else {
-		            setGraphic(buttonBox);
-		        }
-		    }
-		});
+		// Create actions column
+		TableColumn<User, Void> actionCol = createActionsColumn(userTable);
 
 		userTable.getColumns().addAll(usernameCol, reviewsCol, actionCol);
 		userTable.setEditable(true);
-		
-		String query = "TRUNCATE TABLE PendingReviewers";
-
-		try (Statement stmt = StartCSE360.getDatabaseHelper().getConnection().createStatement()) {
-		    stmt.executeUpdate(query);
-		    System.out.println("PendingReviewers table truncated.");
-		} catch (SQLException e) {
-		    e.printStackTrace();
-		}
-
-		String selectQuery = "SELECT * FROM cse360users";
-		String insertQuery = "INSERT INTO PendingReviewers (userName) VALUES (?)";
-		try (
-		    Statement selectStmt = StartCSE360.getDatabaseHelper().getConnection().createStatement();
-		    ResultSet rs = selectStmt.executeQuery(selectQuery);
-		    PreparedStatement insertStmt = StartCSE360.getDatabaseHelper().getConnection().prepareStatement(insertQuery)
-		) {
-		    while (rs.next()) {
-		        String userName = rs.getString("userName");
-		        String password = rs.getString("password");
-		        String role = rs.getString("role");
-
-		        insertStmt.setString(1, userName);
-		        insertStmt.executeUpdate();
-		    }
-
-		    System.out.println("All users inserted into PendingReviewers for testing.");
-		} catch (SQLException e) {
-		    System.err.println("Error inserting users into PendingReviewers.");
-		    e.printStackTrace();
-		}
 		
 		userTable.getItems().clear();
 
@@ -167,5 +85,77 @@ public class InstructorHomePage {
                 break;
             }
         }
+	}
+	
+	private TableColumn<User, String> createUsernameColumn(){
+		TableColumn<User, String> usernameCol = new TableColumn<>("Username");
+		usernameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUserName()));
+		return usernameCol;
+	}
+	
+	private TableColumn<User, Void> createReviewsColumn(Stage primaryStage){
+		TableColumn<User, Void> reviewsCol = new TableColumn<>("Reviews");
+		reviewsCol.setCellFactory(col -> new TableCell<User, Void>() {
+			private final Button reviewsBtn = new Button("Reviews");
+			
+			{
+				reviewsBtn.setStyle("-fx-background-color: #1E90FF; -fx-text-fill: white;");
+				reviewsBtn.setOnAction(a -> {
+					UserReviewsPage userReviewsPage = new UserReviewsPage();
+					userReviewsPage.show(primaryStage,  getTableView().getItems().get(getIndex()));
+				});
+			}
+			
+			@Override
+			protected void updateItem(Void item, boolean empty) {
+			    super.updateItem(item, empty);
+			    if (empty) {
+			        setGraphic(null);
+			    } else {
+			        setGraphic(reviewsBtn);
+			    }
+			}
+		});
+		return reviewsCol;
+	}
+	
+	private TableColumn<User, Void> createActionsColumn(TableView<User> userTable){
+		TableColumn<User, Void> actionCol = new TableColumn<>("Actions");
+		actionCol.setCellFactory(col -> new TableCell<User, Void>() {
+		    private final Button acceptBtn = new Button("Accept");
+		    private final Button rejectBtn = new Button("Reject");
+		    private final HBox buttonBox = new HBox(10, acceptBtn, rejectBtn);
+
+		    {
+		        acceptBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+		        rejectBtn.setStyle("-fx-background-color: #F44336; -fx-text-fill: white;");
+
+		        acceptBtn.setOnAction(event -> {
+		            User user = getTableView().getItems().get(getIndex());
+		            removeUserFromTable(user.getUserName(), userTable);
+		            StartCSE360.getDatabaseHelper().updateUserRole(user.getUserName(), UserRole.REVIEWER);
+		            System.out.println("Accepted: " + user.getUserName());
+		        });
+
+		        rejectBtn.setOnAction(event -> {
+		            User user = getTableView().getItems().get(getIndex());
+		            removeUserFromTable(user.getUserName(), userTable);
+		            System.out.println("Rejected: " + user.getUserName());
+		        });
+
+		        buttonBox.setAlignment(Pos.CENTER);
+		    }
+
+		    @Override
+		    protected void updateItem(Void item, boolean empty) {
+		        super.updateItem(item, empty);
+		        if (empty) {
+		            setGraphic(null);
+		        } else {
+		            setGraphic(buttonBox);
+		        }
+		    }
+		});
+		return actionCol;
 	}
 }

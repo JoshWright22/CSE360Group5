@@ -119,7 +119,7 @@ public class DatabaseHelper {
 		//Create the PendingReviewers table
 		String pendingReviewersTable = "CREATE TABLE IF NOT EXISTS PendingReviewers ("
 				+ "id INT AUTO_INCREMENT PRIMARY KEY,"
-				+ "userName VARCHAR(255))";
+				+ "userName VARCHAR(255) UNIQUE)";
 		statement.execute(pendingReviewersTable);
 	}
 

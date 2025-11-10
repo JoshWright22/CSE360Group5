@@ -11,6 +11,10 @@ import javafx.stage.Stage;
 import javafx.stage.Screen;
 import javafx.geometry.*;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -107,9 +111,29 @@ public class UserHomePage {
 		});
 		postBox.getChildren().addAll(titleLabel, titleTextArea, bodyLabel, bodyTextArea, postButton);
 
+		//Request Reviewer HBox
+		HBox requestReviewerHBox = new HBox(10);
+		requestReviewerHBox.setAlignment(Pos.CENTER_RIGHT);
+		//Request Reviewer Role button
+		Button requestReviewerBtn = new Button("Request Reviewer Role");
+		requestReviewerBtn.setOnAction(a -> {
+			String query = "INSERT INTO PendingReviewers (userName) VALUES (?)";
+			try (
+					PreparedStatement stmt = StartCSE360.getDatabaseHelper().getConnection().prepareStatement(query)
+				) {
+				    stmt.setString(1, StartCSE360.getCurrentUser().getUserName());
+				    stmt.executeUpdate();
+				} catch (SQLException e) {
+				    System.err.println("Error inserting users into PendingReviewers.");
+				    e.printStackTrace();
+				}
+		});
+		
+		requestReviewerHBox.getChildren().add(requestReviewerBtn);
+		
 		VBox layout = new VBox(15);
 		layout.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-		layout.getChildren().addAll(userLabel, reviewerButtons, searchBox, questionsScrollPane, new Separator(), postBox);
+		layout.getChildren().addAll(userLabel, reviewerButtons, searchBox, questionsScrollPane, new Separator(), postBox, requestReviewerHBox);
 
 		Scene userScene = new Scene(layout, 800, 400);
 		primaryStage.setScene(userScene);
