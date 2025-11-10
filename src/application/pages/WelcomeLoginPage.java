@@ -50,7 +50,8 @@ public class WelcomeLoginPage {
                 default:
                     new UserHomePage().show(primaryStage);
                     break;
-
+            }
+		});
 		// Button to quit the application
 		Button quitButton = new Button("Quit");
 		quitButton.setOnAction(a -> {
