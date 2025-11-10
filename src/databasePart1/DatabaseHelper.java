@@ -115,6 +115,12 @@ public class DatabaseHelper {
 				+ "sentTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
 				+ "isRead BOOLEAN DEFAULT FALSE)";
 		statement.execute(messagesTable);
+		
+		//Create the PendingReviewers table
+		String pendingReviewersTable = "CREATE TABLE IF NOT EXISTS PendingReviewers ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY,"
+				+ "userName VARCHAR(255))";
+		statement.execute(pendingReviewersTable);
 	}
 
 	public boolean isDatabaseEmpty() {
@@ -207,7 +213,7 @@ public class DatabaseHelper {
 			if (rs.next()) {
 				user = new User(rs.getString("userName"), rs.getString("password"),
 						rs.getString("firstName"), rs.getString("lastName"), rs.getString("email"),
-						UserRole.valueOf(rs.getString("role")));
+						UserRole.valueOf(rs.getString("role").toUpperCase()));
 			}
 		} catch (SQLException e) {
 			System.err.println("Failed to fetch a user from the database.");
@@ -259,6 +265,19 @@ public class DatabaseHelper {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void removeFromPendingReviewers(String userName)
+	{
+		String query = "DELETE FROM PendingReviewers WHERE userName = ?";
+
+		try (PreparedStatement stmt = connection.prepareStatement(query)) {
+		    stmt.setString(1, userName);
+		    int rowsDeleted = stmt.executeUpdate();
+		    System.out.println("Deleted " + rowsDeleted + " row(s) from PendingReviewers.");
+		} catch (SQLException e) {
+		    e.printStackTrace();
 		}
 	}
 

@@ -46,6 +46,7 @@ public class WelcomeLoginPage {
                     break;
                 case INSTRUCTOR:
                 	new InstructorHomePage().show(primaryStage);
+                	break;
                 default:
                     new UserHomePage().show(primaryStage);
                     break;

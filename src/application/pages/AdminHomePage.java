@@ -88,11 +88,9 @@ public class AdminHomePage {
 						UserRole oldRole = user.getRole();
 						UserRole newRole = comboBox.getValue();
 
-						// If the role actually changed
 						if (newRole != null && !newRole.equals(oldRole)) {
 							user.setRole(newRole);
 							updateButton.setVisible(true);
-
 							comboBox.setStyle("-fx-background-color: lightyellow;");
 						} else {
 							comboBox.setStyle("");
