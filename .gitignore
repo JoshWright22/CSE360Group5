@@ -32,6 +32,7 @@ replay_pid*
 bin/
 target/
 *.class
+src/module-info.java
 
 # Maven-specific (if applicable)
 .factorypath
