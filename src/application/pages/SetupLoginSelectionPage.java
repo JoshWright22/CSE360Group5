@@ -1,11 +1,10 @@
 package application.pages;
 
+import databasePart1.DatabaseHelper;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import databasePart1.*;
 
 /**
  * The SetupLoginSelectionPage class allows users to choose between setting up a
