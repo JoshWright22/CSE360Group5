@@ -1,22 +1,29 @@
 package application.pages;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import application.StartCSE360;
 import application.User;
 import application.UserRole;
-import application.obj.*;
+import application.obj.Question;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
-import javafx.geometry.*;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.time.LocalDateTime;
-import java.util.*;
+import javafx.stage.Stage;
 
 public class UserHomePage {
 
@@ -111,29 +118,28 @@ public class UserHomePage {
 		});
 		postBox.getChildren().addAll(titleLabel, titleTextArea, bodyLabel, bodyTextArea, postButton);
 
-		//Request Reviewer HBox
+		// Request Reviewer HBox
 		HBox requestReviewerHBox = new HBox(10);
 		requestReviewerHBox.setAlignment(Pos.CENTER_RIGHT);
-		//Request Reviewer Role button
+		// Request Reviewer Role button
 		Button requestReviewerBtn = new Button("Request Reviewer Role");
 		requestReviewerBtn.setOnAction(a -> {
 			String query = "INSERT INTO PendingReviewers (userName) VALUES (?)";
-			try (
-					PreparedStatement stmt = StartCSE360.getDatabaseHelper().getConnection().prepareStatement(query)
-				) {
-				    stmt.setString(1, StartCSE360.getCurrentUser().getUserName());
-				    stmt.executeUpdate();
-				} catch (SQLException e) {
-				    System.err.println("Error inserting users into PendingReviewers.");
-				    e.printStackTrace();
-				}
+			try (PreparedStatement stmt = StartCSE360.getDatabaseHelper().getConnection().prepareStatement(query)) {
+				stmt.setString(1, StartCSE360.getCurrentUser().getUserName());
+				stmt.executeUpdate();
+			} catch (SQLException e) {
+				System.err.println("Error inserting users into PendingReviewers.");
+				e.printStackTrace();
+			}
 		});
-		
+
 		requestReviewerHBox.getChildren().add(requestReviewerBtn);
-		
+
 		VBox layout = new VBox(15);
 		layout.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-		layout.getChildren().addAll(userLabel, reviewerButtons, searchBox, questionsScrollPane, new Separator(), postBox, requestReviewerHBox);
+		layout.getChildren().addAll(userLabel, reviewerButtons, searchBox, questionsScrollPane, new Separator(), postBox,
+				requestReviewerHBox);
 
 		Scene userScene = new Scene(layout, 800, 400);
 		primaryStage.setScene(userScene);
