@@ -1,22 +1,27 @@
 package application.pages;
 
-import application.StartCSE360;
-import application.UserRole;
-import application.obj.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
-import javafx.geometry.Pos;
+import application.StartCSE360;
+import application.UserRole;
+import application.obj.Answer;
+import application.obj.Question;
+import application.obj.Review;
 import javafx.geometry.Orientation;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /*
  * QuestionPage represents the user interface for a given question
@@ -66,8 +71,8 @@ public class QuestionPage {
 
 		VBox layout = new VBox();
 		layout.setStyle("-fx-alignment: top-center; -fx-padding: 20;");
-		layout.getChildren().addAll(removeBox, titleBox, bodyBox, headerBox, new Separator(), answersScrollPane,
-				answerTextArea, postButton);
+		layout.getChildren().addAll(removeBox, titleBox, bodyBox, headerBox, new Separator(), answersScrollPane, answerTextArea,
+				postButton);
 
 		primaryStage.setScene(new Scene(layout, 800, 400));
 		primaryStage.setTitle("User Login");
@@ -150,12 +155,8 @@ public class QuestionPage {
 					return;
 				}
 
-				Review review = StartCSE360.getReviewManager().createNewAnswerReview(
-						StartCSE360.getCurrentUser().getUserName(),
-						LocalDateTime.now(),
-						reviewContent.getText().trim(),
-						ratingCombo.getValue(),
-						answer);
+				Review review = StartCSE360.getReviewManager().createNewAnswerReview(StartCSE360.getCurrentUser().getUserName(),
+						LocalDateTime.now(), reviewContent.getText().trim(), ratingCombo.getValue(), answer);
 
 				if (review == null) {
 					showAlert("Error", "Failed to create review. Please try again.");
@@ -216,8 +217,7 @@ public class QuestionPage {
 		}
 	}
 
-	private HBox createRemoveBox(Stage primaryStage, UserHomePage userHomePage, Question question,
-			List<Answer> answers) {
+	private HBox createRemoveBox(Stage primaryStage, UserHomePage userHomePage, Question question, List<Answer> answers) {
 		HBox removeBox = new HBox(6);
 		Button backButton = new Button("<-");
 		backButton.setOnMouseClicked(e -> {
@@ -237,8 +237,7 @@ public class QuestionPage {
 		return removeBox;
 	}
 
-	private HBox createTitleBox(Stage primaryStage, UserHomePage userHomePage, Question question,
-			List<Answer> answers) {
+	private HBox createTitleBox(Stage primaryStage, UserHomePage userHomePage, Question question, List<Answer> answers) {
 		HBox titleBox = new HBox(6);
 		titleBox.setAlignment(Pos.TOP_CENTER);
 		Label titleLabel = new Label(question.getTitle());
@@ -247,8 +246,7 @@ public class QuestionPage {
 		return titleBox;
 	}
 
-	private HBox createHeaderBox(Stage primaryStage, UserHomePage userHomePage, Question question,
-			List<Answer> answers) {
+	private HBox createHeaderBox(Stage primaryStage, UserHomePage userHomePage, Question question, List<Answer> answers) {
 		HBox headerBox = new HBox(6);
 		headerBox.setAlignment(Pos.TOP_RIGHT);
 		headerBox.setPrefWidth(Double.MAX_VALUE);
