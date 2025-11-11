@@ -57,7 +57,11 @@ public class InstructorHomePage {
 				String userName = rs.getString("userName");
 
 				User user = StartCSE360.getDatabaseHelper().fetchUser(userName);
-				userTable.getItems().add(user);
+				if (user != null) {
+					userTable.getItems().add(user);
+				} else {
+					System.out.println("Skipping null user fetched for username: " + userName);
+				}
 			}
 
 			System.out.println("Loaded PendingReviewers into table.");
@@ -70,7 +74,9 @@ public class InstructorHomePage {
 	private void removeUserFromTable(String userName, TableView<User> userTable) {
 		StartCSE360.getDatabaseHelper().removeFromPendingReviewers(userName);
 		for (User u : userTable.getItems()) {
-			if (u.getUserName().equals(userName) && u != null) {
+			if (u == null)
+				continue;
+			if (u.getUserName().equals(userName)) {
 				userTable.getItems().remove(u);
 				break;
 			}
@@ -79,7 +85,13 @@ public class InstructorHomePage {
 
 	private TableColumn<User, String> createUsernameColumn() {
 		TableColumn<User, String> usernameCol = new TableColumn<>("Username");
-		usernameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUserName()));
+		usernameCol.setCellValueFactory(cellData -> {
+			User u = cellData.getValue();
+			if (u == null || u.getUserName() == null) {
+				return new SimpleStringProperty("");
+			}
+			return new SimpleStringProperty(u.getUserName());
+		});
 		return usernameCol;
 	}
 
@@ -91,8 +103,11 @@ public class InstructorHomePage {
 			{
 				reviewsBtn.setStyle("-fx-background-color: #1E90FF; -fx-text-fill: white;");
 				reviewsBtn.setOnAction(a -> {
+					User target = getTableView().getItems().get(getIndex());
+					if (target == null)
+						return;
 					UserReviewsPage userReviewsPage = new UserReviewsPage();
-					userReviewsPage.show(primaryStage, getTableView().getItems().get(getIndex()));
+					userReviewsPage.show(primaryStage, target);
 				});
 			}
 
@@ -122,6 +137,8 @@ public class InstructorHomePage {
 
 				acceptBtn.setOnAction(event -> {
 					User user = getTableView().getItems().get(getIndex());
+					if (user == null)
+						return;
 					removeUserFromTable(user.getUserName(), userTable);
 					StartCSE360.getDatabaseHelper().updateUserRole(user.getUserName(), UserRole.REVIEWER);
 					System.out.println("Accepted: " + user.getUserName());
@@ -129,6 +146,8 @@ public class InstructorHomePage {
 
 				rejectBtn.setOnAction(event -> {
 					User user = getTableView().getItems().get(getIndex());
+					if (user == null)
+						return;
 					removeUserFromTable(user.getUserName(), userTable);
 					System.out.println("Rejected: " + user.getUserName());
 				});
