@@ -1,13 +1,14 @@
 package application.pages;
 
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import javafx.application.Platform;
 import application.User;
 import application.UserRole;
-import databasePart1.*;
+import databasePart1.DatabaseHelper;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * The WelcomeLoginPage class displays a welcome screen for authenticated users.
@@ -36,21 +37,21 @@ public class WelcomeLoginPage {
 			UserRole role = user.getRole();
 			System.out.println(role);
 
-            switch (role) {
-                case ADMIN:
-                    new AdminHomePage().show(primaryStage);
-                    break;
-                case STUDENT:
-                case REVIEWER: // reviewers go to the same home page but get extra navigation
-                    new UserHomePage().show(primaryStage);
-                    break;
-                case INSTRUCTOR:
-                	new InstructorHomePage().show(primaryStage);
-                	break;
-                default:
-                    new UserHomePage().show(primaryStage);
-                    break;
-            }
+			switch (role) {
+			case ADMIN:
+				new AdminHomePage().show(primaryStage);
+				break;
+			case STUDENT:
+			case REVIEWER: // reviewers go to the same home page but get extra navigation
+				new UserHomePage().show(primaryStage);
+				break;
+			case INSTRUCTOR:
+				new InstructorHomePage().show(primaryStage);
+				break;
+			default:
+				new UserHomePage().show(primaryStage);
+				break;
+			}
 		});
 		// Button to quit the application
 		Button quitButton = new Button("Quit");
