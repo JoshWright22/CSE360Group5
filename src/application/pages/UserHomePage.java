@@ -126,49 +126,7 @@ public class UserHomePage {
 		// Request Reviewer Role button
 		Button requestReviewerBtn = new Button("Request Reviewer Role");
 		requestReviewerBtn.setOnAction(a -> {
-			// Safely insert into PendingReviewers only if not already present
-			try {
-				Connection conn = StartCSE360.getDatabaseHelper().getConnection();
-				if (conn == null) {
-					// Try to establish connection if it's not already
-					try {
-						StartCSE360.getDatabaseHelper().connectToDatabase();
-					} catch (SQLException ex) {
-						System.err.println("Unable to connect to database for pending reviewer request.");
-						ex.printStackTrace();
-						return;
-					}
-					conn = StartCSE360.getDatabaseHelper().getConnection();
-					if (conn == null) {
-						System.err.println("Database connection is null; cannot request reviewer role.");
-						return;
-					}
-				}
-
-				String checkSql = "SELECT userName FROM PendingReviewers WHERE userName = ?";
-				try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-					checkStmt.setString(1, StartCSE360.getCurrentUser().getUserName());
-					try (ResultSet rs = checkStmt.executeQuery()) {
-						if (rs.next()) {
-							// Already requested - ignore or notify
-							System.out.println(
-									"User already in PendingReviewers: " + StartCSE360.getCurrentUser().getUserName());
-							return;
-						}
-					}
-				}
-
-				String insertSql = "INSERT INTO PendingReviewers (userName) VALUES (?)";
-				try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-					insertStmt.setString(1, StartCSE360.getCurrentUser().getUserName());
-					insertStmt.executeUpdate();
-					System.out.println(
-							"Pending reviewer request submitted for: " + StartCSE360.getCurrentUser().getUserName());
-				}
-			} catch (SQLException e) {
-				System.err.println("Error inserting users into PendingReviewers.");
-				e.printStackTrace();
-			}
+			StartCSE360.getDatabaseHelper().insertIntoPendingReviewers(StartCSE360.getCurrentUser().getUserName());
 		});
 
 		requestReviewerHBox.getChildren().add(requestReviewerBtn);

@@ -268,7 +268,34 @@ public class DatabaseHelper {
 		}
 	}
 	
-	public void removeFromPendingReviewers(String userName)
+	public void insertIntoPendingReviewers(String userName)
+	{
+		//Check connection to database. Return if not established
+		if(connection == null)
+		{
+			System.err.println("Connection to database not established. Could not insert user " + userName + " into pending reviewers.");
+			return;
+		}
+		
+		//Attempt to insert user into table. If user already exists,
+		//an SQL Exception will be thrown
+		String insertSql = "INSERT INTO PendingReviewers (userName) VALUES (?)";
+		try (PreparedStatement stmt = connection.prepareStatement(insertSql)) {
+		    stmt.setString(1, userName);
+		    stmt.executeUpdate();
+		    System.out.println("Pending reviewer request submitted for: " + userName);
+		} catch (SQLException e) {
+		    // If duplicate, SQL state 23000 or similar
+		    if (e.getSQLState() != null && e.getSQLState().startsWith("23")) {
+		        System.out.println("User already requested reviewer role.");
+		    } else {
+		        System.err.println("Database error while inserting into PendingReviewers.");
+		        e.printStackTrace();
+		    }
+		}
+	}
+	
+	public boolean removeFromPendingReviewers(String userName)
 	{
 		String query = "DELETE FROM PendingReviewers WHERE userName = ?";
 
@@ -276,8 +303,26 @@ public class DatabaseHelper {
 		    stmt.setString(1, userName);
 		    int rowsDeleted = stmt.executeUpdate();
 		    System.out.println("Deleted " + rowsDeleted + " row(s) from PendingReviewers.");
+		    return rowsDeleted > 0;
 		} catch (SQLException e) {
 		    e.printStackTrace();
+		    return false;
+		}
+	}
+	
+	public boolean approvePendingReviewer(String userName)
+	{
+		boolean removed = removeFromPendingReviewers(userName);
+		
+		if(removed)
+		{
+			updateUserRole(userName, UserRole.REVIEWER);
+			return true;
+		}
+		else
+		{
+			System.err.println("User not found.");
+			return false;
 		}
 	}
 

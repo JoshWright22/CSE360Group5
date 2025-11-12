@@ -72,7 +72,6 @@ public class InstructorHomePage {
 	}
 
 	private void removeUserFromTable(String userName, TableView<User> userTable) {
-		StartCSE360.getDatabaseHelper().removeFromPendingReviewers(userName);
 		for (User u : userTable.getItems()) {
 			if (u == null)
 				continue;
@@ -139,8 +138,8 @@ public class InstructorHomePage {
 					User user = getTableView().getItems().get(getIndex());
 					if (user == null)
 						return;
+					StartCSE360.getDatabaseHelper().approvePendingReviewer(user.getUserName());
 					removeUserFromTable(user.getUserName(), userTable);
-					StartCSE360.getDatabaseHelper().updateUserRole(user.getUserName(), UserRole.REVIEWER);
 					System.out.println("Accepted: " + user.getUserName());
 				});
 
@@ -148,6 +147,7 @@ public class InstructorHomePage {
 					User user = getTableView().getItems().get(getIndex());
 					if (user == null)
 						return;
+					StartCSE360.getDatabaseHelper().removeFromPendingReviewers(user.getUserName());
 					removeUserFromTable(user.getUserName(), userTable);
 					System.out.println("Rejected: " + user.getUserName());
 				});
